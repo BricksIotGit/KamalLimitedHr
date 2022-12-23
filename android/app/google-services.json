@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1033211481035",
+    "project_id": "kamallimited-7a9a5",
+    "storage_bucket": "kamallimited-7a9a5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1033211481035:android:871452ab84893d81c6044e",
+        "android_client_info": {
+          "package_name": "com.example.kamal_limited"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1033211481035-cvbpcbvrh1qvu9uetec9q2idtheddejo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSRvsIhQot2A0QPcHvTmqYoqei8mQIjio"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1033211481035-cvbpcbvrh1qvu9uetec9q2idtheddejo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
