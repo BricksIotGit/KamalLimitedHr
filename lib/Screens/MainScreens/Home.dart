@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:anim_search_bar/anim_search_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kamal_limited/Screens/MainScreens/Announcements.dart';
@@ -27,8 +27,11 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String dropdownvalue = 'Employ Directory';
+  TextEditingController textController = new TextEditingController();
 
   // List of items in our dropdown menu
+  List<String> results = [];
+
   var items = [
     'Employ Directory',
     'Leave Requests',
@@ -45,10 +48,27 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    void setResults(String query) {
+      setState(() {
+        //createPDF();
+        print('row is ${items}');
+        print('row  ${query}');
+
+        results = items
+            .where((elem) =>
+                elem.toString().toLowerCase().contains(query.toLowerCase()))
+            .toList();
+        print("resul ${results}");
+
+        items = results;
+      });
+      // createPDF();
+    }
+
     return Scaffold(
       backgroundColor: Clrs.light_Grey,
       body: SafeArea(
-        child: Container(
+        child: SingleChildScrollView(
           child: Column(
             children: [
               Stack(
@@ -76,11 +96,26 @@ class _HomeState extends State<Home> {
                           //Center Row contents horizontally,
 
                           children: [
-                            Image(
-                              //   height:50* SizeConfig.heightMultiplier,
-                              width: 10 * SizeConfig.widthMultiplier,
-                              image: AssetImage(Images.search_ic),
+                            SizedBox(
+                              height: 45,
+                              child: AnimSearchBar(
+                                width: 75 * SizeConfig.widthMultiplier,
+                                textController: textController,
+                                onSuffixTap: () {
+                                  setState(() {
+                                    textController.clear();
+                                  });
+                                },
+                                onSubmitted: (String) {
+                                  //setResults(String);
+                                },
+                              ),
                             ),
+                            // Image(
+                            //   //   height:50* SizeConfig.heightMultiplier,
+                            //   width: 10 * SizeConfig.widthMultiplier,
+                            //   image: AssetImage(Images.search_ic),
+                            // ),
                             Image(
                               //   height:50* SizeConfig.heightMultiplier,
                               width: 10 * SizeConfig.widthMultiplier,
@@ -520,7 +555,6 @@ class _HomeState extends State<Home> {
                         onTap: () {
                           //signout
                           _signOut();
-
                         },
                         child: Container(
                           padding: const EdgeInsets.all(8),
@@ -563,8 +597,6 @@ class _HomeState extends State<Home> {
     AuthenticationRepo.instance.logout();
 
     Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const Login()));
+        context, MaterialPageRoute(builder: (context) => const Login()));
   }
 }
