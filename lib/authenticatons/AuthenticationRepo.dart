@@ -4,6 +4,8 @@ import 'package:kamal_limited/Screens/MainScreens/Home.dart';
 import 'package:kamal_limited/Screens/Starting/Login.dart';
 import 'package:kamal_limited/authenticatons/exceptions/SignInWithEmailAndPassFail.dart';
 
+import '../utils/Toast.dart';
+
 class AuthenticationRepo extends GetxController {
   static AuthenticationRepo get instance => Get.find();
 
@@ -46,8 +48,13 @@ class AuthenticationRepo extends GetxController {
       await _auth.signInWithEmailAndPassword(
           email: email, password: password);
     }
-    on FirebaseAuthException catch (e) {}
-    catch (_) {}
+    on FirebaseAuthException catch (e) {
+      toast("Error $e", print: true);
+
+    }
+    catch (_) {
+      toast("Error $_", print: true);
+    }
   }
 
 
