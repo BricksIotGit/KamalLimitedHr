@@ -39,16 +39,25 @@ dependencies:
   get: ^4.6.1
   get_storage: ^2.0.3
   http: ^0.13.5
+  xml: ^6.0.0
   toggle_switch: ^2.0.1
   font_awesome_flutter: ^10.3.0
+  firebase_database: ^10.0.13
+  shared_preferences: ^2.0.17
+  fluttertoast: ^7.1.8
+  intl: ^0.17.0
+
+  #syncfusion_flutter_datepicker: ^20.4.40
+  #flutter_launcher_icons: ^0.7.3
 
 
 flutter_icons:
   android: true
   ios: true
+ # remove_alpha_ios: true
   image_path_android: "assets/images/company_logo.png"
   image_path: "assets/images/company_logo.png"
-  min_sdk_android: 21 # android min sdk min:16, default 21
+ # min_sdk_android: 21 # android min sdk min:16, default 21
 #  web:
 #    generate: true
 #    image_path: "path/to/image.png"

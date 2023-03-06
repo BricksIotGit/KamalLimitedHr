@@ -10,7 +10,7 @@ class LoginUpController extends GetxController {
   static LoginUpController get instance => Get.find();
 
   //TextField Controllers to get data from TextFields
-  final email = TextEditingController();
+  final empID = TextEditingController();
   final password = TextEditingController();
 
 //Call this Function from Design & it will do the rest

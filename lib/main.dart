@@ -11,7 +11,7 @@ import 'Screens/Starting/Splash.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
-      .then((value) => Get.put(AuthenticationRepo()));
+  Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+     // .then((value) => Get.put(AuthenticationRepo()));
   runApp(GetMaterialApp(home: SplashScreen()));
 }

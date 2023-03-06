@@ -1,7 +1,11 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:kamal_limited/Screens/Setting/UpdateProfile.dart';
+import 'package:kamal_limited/utils/Toast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../controllers/login_controller.dart';
 import '../../styling/colors.dart';
@@ -17,9 +21,8 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
-  final controller= Get.put(LoginUpController());
-  final _formKey= GlobalKey<FormState>();
+  final controller = Get.put(LoginUpController());
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +66,7 @@ class _LoginState extends State<Login> {
                 Padding(
                   padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
                   child: TextFormField(
-                    controller: controller.email,
+                    controller: controller.empID,
                     cursorColor: Clrs.white,
                     style: const TextStyle(color: Colors.white54),
                     decoration: const InputDecoration(
@@ -82,7 +85,7 @@ class _LoginState extends State<Login> {
                               BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
-                        labelText: 'Username',
+                        labelText: 'Employee ID',
                         labelStyle: TextStyle(color: Colors.white54)),
                   ),
                 ),
@@ -90,8 +93,8 @@ class _LoginState extends State<Login> {
                   padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
                   child: TextFormField(
                     controller: controller.password,
-
                     cursorColor: Clrs.white,
+                      obscureText: true,
                     style: const TextStyle(color: Colors.white54),
                     decoration: const InputDecoration(
                         focusedBorder: OutlineInputBorder(
@@ -113,21 +116,31 @@ class _LoginState extends State<Login> {
                         labelStyle: TextStyle(color: Colors.white54)),
                   ),
                 ),
-                TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      "Forget Password?",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    )),
+                // TextButton(
+                //     onPressed: () {},
+                //     child: Text(
+                //       "Forget Password?",
+                //       style: TextStyle(
+                //         color: Colors.white,
+                //       ),
+                //     )),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(0, 70, 0, 10),
                   child: ElevatedButton(
                     onPressed: () {
-                      if(_formKey.currentState!.validate()){
-                        LoginUpController.instance.loginUser(controller.email.text.trim(), controller.password.text.trim());
-                      }
+                      if (_formKey.currentState!.validate()) {
+
+
+                        getLogins(controller.empID.text.trim(),
+                            controller.password.text.trim());
+
+
+
+                      //   LoginUpController.instance.loginUser(
+                      //       controller.email.text.trim(),
+                      //       controller.password.text.trim());
+
+                  }
                       // Navigator.pushReplacement(
                       //     context, MaterialPageRoute(builder: (context) => Home()));
                     },
@@ -142,11 +155,11 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                 ),
-
                 Padding(
                   padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
                   child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center, //Center Row contents horizontally,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    //Center Row contents horizontally,
                     children: [
                       Text("Want to create new account?",
                           style: TextStyle(
@@ -154,8 +167,10 @@ class _LoginState extends State<Login> {
                           )),
                       TextButton(
                           onPressed: () {
-                          Navigator.pushReplacement(
-                                   context, MaterialPageRoute(builder: (context) => Signup()));
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Signup()));
                           },
                           child: Text(
                             "Signp",
@@ -172,5 +187,69 @@ class _LoginState extends State<Login> {
         ),
       ),
     );
+  }
+  Future<void> getLogins(String empID, String password) async {
+
+    FirebaseDatabase database = FirebaseDatabase.instance;
+    final ref = database.ref();
+
+
+    final snapshot = await ref.child('usersLogin/$empID').get();
+    if (snapshot.exists) {
+      print("Login is v: ${snapshot.value}");
+      print("Login is K: ${snapshot.key}");
+
+
+      for(var a in snapshot.children){
+
+
+        if(a.key=='password'){
+          var passIs=a.value;
+          print("a Login is ${passIs}");
+          if(passIs.toString()==password){
+           // toast("Password Match",print: true);
+
+            if(password=='123456') {
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) =>
+                  UpdateProfile(controller.empID.text.trim())));
+            }
+            else{
+              storeLogin(controller.empID.text, controller.password.text);
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) =>
+                  Home()));
+            }
+
+            // storeLogin( controller.empID.text.trim(),
+            //     controller.password.text.trim());
+          }else
+            toast("Wrong password!",print: true);
+
+        }
+        if(a.key=='userId'){
+
+          print("a Login is ${a.value}");
+
+        }
+
+      }
+
+    } else {
+      print('No data available.');
+      toast("No account exist");
+    }
+  }
+
+  Future<void> storeLogin(String empId, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('empID', empId);
+    await prefs.setString('password', password);
+
+
+    final String? empIDSp = prefs.getString('empID');
+    final String? passwordSP = prefs.getString('password');
+
+    print("sharedPreff empID: $empIDSp and password $passwordSP");
   }
 }

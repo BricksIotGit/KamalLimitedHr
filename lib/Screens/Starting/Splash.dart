@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../styling/colors.dart';
 import '../../styling/images.dart';
 import '../../styling/size_config.dart';
+import '../MainScreens/Home.dart';
 import 'Login.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,15 +22,35 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Timer(Duration(seconds: 2),
-            ()=>Navigator.pushReplacement(context,
-            MaterialPageRoute(builder:
-                (context) =>
-                Login()
-            )
-        )
+            ()=>checkLogin()
+
     );
   }
 
+  Future<void> checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? passwordSP = prefs.getString('password');
+
+    print("splash $passwordSP password");
+    if(passwordSP ==null )
+      {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder:
+                (context) =>
+                Login()
+            ));
+      }
+
+    else{
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder:
+              (context) =>
+              Home()
+          ));
+            }
+
+    print("sharedPreff and password $passwordSP");
+  }
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
