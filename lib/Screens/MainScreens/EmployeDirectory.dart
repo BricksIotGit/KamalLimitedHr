@@ -18,12 +18,13 @@ class EmployeeDirectory extends StatefulWidget {
 }
 
 class _EmployeeDirectoryState extends State<EmployeeDirectory> {
-  String dropdownvalueDesig = 'RECEPTIONIST';
-  String dropdownvalueDepart = 'GD - ADMINISTRATION';
+  String dropdownvalueDesig = 'ALL';
+  String dropdownvalueDepart = 'ALL';
 
   String infoEmpId = "0000";
   String infoEmpDesignLvl = "0000";
   String infoEmpDvName = "0000";
+  String infoEmpDvEmail = "0000";
 
   TextEditingController textController = new TextEditingController();
   bool fetchOrNot = false;
@@ -31,16 +32,155 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   List<Map<String, String>> employeesDirectoryBackup = [];
 
   var itemsOfDg = [
+    'ALL',
     'RECEPTIONIST',
+    'EXECUTIVE',
+    'DEPUTY MANAGER',
+    'MANAGER',
+    'GENERAL MANAGER',
+    'ASSISTANT MANAGER',
+    'SENIOR MANAGER',
+    'ASSISTANT BUSINESS ANALYST',
+    'OFFICER',
+    'ASSISTANT NETWORK ADMINISTRATOR',
+    'INCHARGE',
+    'RECRUITMENT ASSOCIATE',
+    'TIME KEEPER',
+    'OFFICE BOY',
+    'SUPERVISOR',
+    'GATE CLERK',
+    'CCTV OPERATOR',
+    'EXCHANGE OPERATOR',
     'SWEEPER',
     'DRIVER',
+    'SECURITY GUARD',
   ];
 
   var itemsOfdept = [
+    'ALL',
     'GD - ADMINISTRATION',
+    'GD - INTERNAL AUDIT',
+    'GD - COSTING',
+    'GD - IMPORT & EXPORT',
+    'GD - INFORMATION TECHNOLOGY',
+    'GD - HUMAN RESOURCES',
   ];
   String query = '';
   List<Map<String, String>> results = [];
+
+  void searchFunc(String search, int first) {
+    setState(() {
+      //createPDF();
+
+      print(
+          '2 desig is:  ${dropdownvalueDesig} and dept is:$dropdownvalueDepart');
+      // print("name: ${employeesDirectory[0]['ename']}");
+
+      if (first == 1 &&
+          dropdownvalueDepart == "ALL" &&
+          dropdownvalueDesig == "ALL") {
+        print('1');
+
+        results = employeesDirectoryBackup
+            .where((elem) =>
+                // elem['empDesig']
+                //     .toString()
+                //     .toLowerCase()
+                //     .contains(query.toLowerCase()) ||
+                elem['ename']
+                    .toString()
+                    .toLowerCase()
+                    .contains(query.toLowerCase()))
+            .toList();
+
+        employeesDirectory = results;
+      } else if (first == 1 &&
+          dropdownvalueDepart != "ALL" &&
+          dropdownvalueDesig == "ALL") {
+        print('2');
+
+        // results = employeesDirectoryBackup
+        //      .where((elem) =>
+        //  elem['empDpt']
+        //      .toString()
+        //      .toLowerCase()
+        //      .contains(query.toLowerCase()))
+        //      .toList();
+
+        print("Length 1: ${results.length}");
+        results = results
+            .where((elem) => elem['ename']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+        print("Length 2: ${results.length}");
+
+        employeesDirectory = results;
+      } else if (first == 1 &&
+          dropdownvalueDepart != "ALL" &&
+          dropdownvalueDesig != "ALL") {
+        print("3");
+        results = employeesDirectoryBackup
+            .where((elem) => elem['ename']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+
+        // results = results
+        //     .where((elem) =>
+        // elem['empDpt']
+        //     .toString()
+        //     .toLowerCase()
+        //     .contains(query.toLowerCase()))
+        //     .toList();
+        //
+        // results = results
+        //     .where((elem) =>
+        // elem['empDesig']
+        //     .toString()
+        //     .toLowerCase()
+        //     .contains(query.toLowerCase()))
+        //     .toList();
+
+        employeesDirectory = results;
+      } else if (first == 1 &&
+          dropdownvalueDepart == "ALL" &&
+          dropdownvalueDesig != "ALL") {
+        print("4");
+        results = employeesDirectoryBackup
+            .where((elem) => elem['ename']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+
+        results = results
+            .where((elem) => elem['empDpt']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+
+        results = results
+            .where((elem) => elem['empDesig']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+
+        employeesDirectory = results;
+      }
+
+      //  print("resul 2: ${results}");
+      // print("resul ${results[0]['ename']}");
+      //print("length before ${employeesDirectory.length}");
+
+      // employeesDirectory = results;
+      // print("length after ${employeesDirectory.length}");
+    });
+  }
 
   void setResults(String query) {
     setState(() {
@@ -50,10 +190,10 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
 
       results = employeesDirectory
           .where((elem) =>
-              elem['empDesig']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query.toLowerCase()) ||
+              // elem['empDesig']
+              //     .toString()
+              //     .toLowerCase()
+              //     .contains(query.toLowerCase()) ||
               elem['ename']
                   .toString()
                   .toLowerCase()
@@ -63,10 +203,23 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
       //  print("resul 2: ${results}");
       print("resul ${results[0]['ename']}");
 
-      print("length before ${employeesDirectory.length}");
+      // print("length before ${employeesDirectory.length}");
 
       employeesDirectory = results;
-      print("length after ${employeesDirectory.length}");
+      // print("length after ${employeesDirectory.length}");
+    });
+    // createPDF();
+  }
+
+  void setResultsDropDept(String query) {
+    setState(() {
+      results = employeesDirectoryBackup
+          .where((elem) => elem['empDpt']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase()))
+          .toList();
+      employeesDirectory = results;
     });
     // createPDF();
   }
@@ -74,54 +227,43 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   void setResultsDropDown(String query) {
     setState(() {
       //createPDF();
-      print('row is ${employeesDirectory}');
-      print("name: ${employeesDirectory[0]['ename']}");
+      print('EM length: ${employeesDirectory.length}');
+      print('EMB length: ${employeesDirectoryBackup.length}');
+      //  print("name: ${employeesDirectory[0]['ename']}");
 
-      results = employeesDirectory
-          .where((elem) => elem['empDesig']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query.toLowerCase())
-              // ||
-              //
-              //     elem['ename']
-              //         .toString()
-              //         .toLowerCase()
-              //         .contains(query.toLowerCase())
-              )
-          .toList();
-
-      //  print("resul 2: ${results}");
-      print("resul ${results[0]['ename']}");
-
-      print("length before ${employeesDirectory.length}");
-
-      employeesDirectory = results;
-      print("length after ${employeesDirectory.length}");
-    });
-    // createPDF();
-  }
-
-  void setResultsDropDept(String query) {
-    setState(() {
-      //createPDF();
-      print('row is ${employeesDirectory}');
-      print("name: ${employeesDirectory[0]['ename']}");
-
-      results = employeesDirectory
-          .where((elem) => elem['empDpt']
-              .toString()
-              .toLowerCase()
-              .contains(query.toLowerCase()))
-          .toList();
+      if (employeesDirectory.length == employeesDirectoryBackup.length) {
+        results = employeesDirectoryBackup
+            .where((elem) => elem['empDesig']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+        employeesDirectory = results;
+      } else if (employeesDirectory.length == 0) {
+        results = employeesDirectoryBackup
+            .where((elem) => elem['empDpt']
+                .toString()
+                .toLowerCase()
+                .contains(dropdownvalueDepart.toLowerCase()))
+            .toList();
+        employeesDirectory = results;
+        //setResultsDropDown(query);
+      } else {
+        results = employeesDirectory
+            .where((elem) => elem['empDesig']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()))
+            .toList();
+        employeesDirectory = results;
+      }
 
       //  print("resul 2: ${results}");
-      print("resul ${results[0]['ename']}");
+      // print("resul ${results[0]['ename']}");
 
-      print("length before ${employeesDirectory.length}");
+      // print("length before ${employeesDirectory.length}");
 
-      employeesDirectory = results;
-      print("length after ${employeesDirectory.length}");
+      //  print("length after ${employeesDirectory.length}");
     });
     // createPDF();
   }
@@ -160,8 +302,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
 </soapenv:Envelope>''';
 
     var response = await post(
-      Uri.parse(
-          'http://XXHRMS:XXHRMS@202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_DIRECTORY'),
+      Uri.parse('http://202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_DIRECTORY'),
       headers: {
         'content-type': 'text/xml; charset=utf-8',
         'authorization': basicAuth
@@ -170,7 +311,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
     );
 
     print("Response status: ${response.statusCode}");
-    print("Response body: ${response.body}");
+    // print("Response body: ${response.body}");
 
     if (response.statusCode == 200) {
       setState(() {
@@ -197,8 +338,15 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
       final empDpt = row.findElements('EMP_DEPARTMENT').single.text;
       final empDesig = row.findElements('EMP_DESIGNATION').single.text;
       final doj = row.findElements('DOJ').single.text;
-      final doc = row.findElements('DOC').single.text;
+      final doc = (row.findElements('DOC').isNotEmpty)
+          ? row.findElements('DOC').single.text
+          : "";
+      final empEmail = (row.findElements('EMAIL').isNotEmpty)
+          ? row.findElements('EMAIL').single.text
+          : "";
+
       final empType = row.findElements('EMP_TYPE').single.text;
+
       final empShift = row.findElements('EMP_SHIFT').single.text;
       final empDvName = row.findElements('DIV_NAME').single.text;
       final empDesignLvl = row.findElements('EMP_DESIGNATION_LVL').single.text;
@@ -213,6 +361,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
         'doj': doj,
         'doc': doc,
         'empType': empType,
+        'empEmail': empEmail,
         'empShift': empShift,
         'empDvName': empDvName,
         'empDesignLvl': empDesignLvl,
@@ -221,7 +370,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
       employeesDirectoryBackup = employeesDirectory;
     }
 
-    print("Response employees: ${employeesDirectory[0]["ename"]}");
+    print("Response employees length: ${employeesDirectory.length}");
   }
 
   void infoAlertCustom() {
@@ -243,7 +392,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                       text: 'Employee ID:',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    TextSpan(text: ' $infoEmpId!'),
+                    TextSpan(text: ' $infoEmpId'),
                   ],
                 ),
               ),
@@ -257,7 +406,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                       text: 'Division Name: ',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    TextSpan(text: ' $infoEmpDvName!'),
+                    TextSpan(text: ' $infoEmpDvName'),
                   ],
                 ),
               ),
@@ -268,10 +417,10 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: 'Designation Level: ',
+                      text: 'Email: ',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    TextSpan(text: '$infoEmpDesignLvl'),
+                    TextSpan(text: '$infoEmpDvEmail'),
                   ],
                 ),
               ),
@@ -296,9 +445,16 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   @override
   Widget build(BuildContext context) {
     if (fetchOrNot) {
-      return Scaffold(
-        body: SafeArea(
-          child: Container(
+      return WillPopScope(
+
+        onWillPop: () async  {
+          print('The user tries to pop()');
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => const Home()));
+          return false;
+        },
+        child: Scaffold(
+          body: SafeArea(
             child: Column(
               children: [
                 Stack(
@@ -314,7 +470,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                         onTap: () {
                           // Navigator.pop(context);
                           Navigator.pushReplacement(context,
-                              MaterialPageRoute(builder: (context) => Home()));
+                              MaterialPageRoute(builder: (context) => const Home()));
                         },
                         child: Image(
                           width: 10 * SizeConfig.widthMultiplier,
@@ -359,11 +515,11 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                     onChanged: (v) {
                                       setState(() {
                                         query = v;
-                                        if (query.length < 1) {
-                                          // getDocumentListApiCall();
+                                        if (query.isEmpty) {
                                           reasign();
                                         }
-                                        setResults(query);
+
+                                        searchFunc(query, 1);
                                       });
                                     },
                                   ),
@@ -430,24 +586,25 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                             ),
                             dropdownColor: Clrs.light_Grey,
                             // Initial Value
-                            value: dropdownvalueDesig,
+                            value: dropdownvalueDepart,
                             // Down Arrow Ico
                             icon: const Icon(Icons.keyboard_arrow_down),
                             // Array list of items
-                            items: itemsOfDg.map((String items) {
+                            items: itemsOfdept.map((String items) {
                               return DropdownMenuItem(
                                 value: items,
                                 child: Text(items),
                               );
                             }).toList(),
-                            onTap: () {
-                              //here
-                              reasign();
-                            },
+                            onTap: () {},
                             onChanged: (String? newValue) {
                               setState(() {
-                                dropdownvalueDesig = newValue!;
-                                setResultsDropDown(dropdownvalueDesig);
+                                dropdownvalueDepart = newValue!;
+                                if (dropdownvalueDepart == "ALL") {
+                                  reasign();
+                                } else {
+                                  setResultsDropDept(dropdownvalueDepart);
+                                }
                               });
                             },
                           ),
@@ -466,7 +623,6 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                               contentPadding: EdgeInsets.only(
                                   top: 5, bottom: 5, left: 10, right: 5),
                               //this one
-
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
                                     color: Clrs.light_Grey, width: 1),
@@ -487,24 +643,27 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                             ),
                             dropdownColor: Clrs.light_Grey,
                             // Initial Value
-                            value: dropdownvalueDepart,
+                            value: dropdownvalueDesig,
                             // Down Arrow Ico
                             icon: const Icon(Icons.keyboard_arrow_down),
                             // Array list of items
-                            items: itemsOfdept.map((String items) {
+                            items: itemsOfDg.map((String items) {
                               return DropdownMenuItem(
                                 value: items,
                                 child: Text(items),
                               );
                             }).toList(),
-                            onTap: () {
-                              //here
-                              reasign();
-                            },
+                            onTap: () {},
                             onChanged: (String? newValue) {
                               setState(() {
-                                dropdownvalueDepart = newValue!;
-                                setResultsDropDept(dropdownvalueDepart);
+                                dropdownvalueDesig = newValue!;
+                                print(
+                                    "value Drup $dropdownvalueDesig and $newValue");
+                                if (dropdownvalueDesig == "ALL") {
+                                  reasign();
+                                } else {
+                                  setResultsDropDown(dropdownvalueDesig);
+                                }
                               });
                             },
                           ),
@@ -524,49 +683,62 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Text(
-                            "Sr.",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Clrs.dark_Grey),
-                          ),
-                          Text(
-                            "Name.",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Clrs.dark_Grey),
-                          ),
-                          Text(
-                            "Designation.",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Clrs.dark_Grey),
-                          ),
-                          Text(
-                            "Dept.",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Clrs.dark_Grey),
-                          ),
-                          Text(
-                            "Status.",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Clrs.dark_Grey),
-                          )
+                          Flexible(
+                              fit: FlexFit.loose,
+                              child: Text(
+                                "Sr.",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Clrs.dark_Grey),
+                              ),
+                              flex: 0),
+                          Flexible(
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "Name",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Clrs.dark_Grey),
+                                ),
+                              ),
+                              flex: 1),
+                          Flexible(
+                              child: Text(
+                                "Dept.",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Clrs.dark_Grey),
+                              ),
+                              flex: 1),
+                          Flexible(
+                              child: Text(
+                                "Designation",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Clrs.dark_Grey),
+                              ),
+                              flex: 1),
+                          Flexible(
+                              child: Text(
+                                "Status",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Clrs.dark_Grey),
+                              ),
+                              flex: 1)
                         ],
                       ),
                     ),
                   ),
                 ),
-
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -584,32 +756,23 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                             child: ListTile(
                               title: Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceAround,
                                 children: [
                                   Flexible(
                                       child: Text(
                                         "${index + 1}",
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            //fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                             color: Clrs.dark_Grey),
                                       ),
-                                      flex: 1),
+                                      flex: 0),
                                   Flexible(
                                       child: Text(
                                         employeesDirectory[index]['ename']!,
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                            color: Clrs.dark_Grey),
-                                      ),
-                                      flex: 1),
-                                  Flexible(
-                                      child: Text(
-                                        employeesDirectory[index]['empDesig']!,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            //fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                             color: Clrs.dark_Grey),
                                       ),
                                       flex: 1),
@@ -617,9 +780,22 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                       child: Text(
                                         employeesDirectory[index]['empDpt']!,
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            //fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                             color: Clrs.dark_Grey),
+                                      ),
+                                      flex: 1),
+                                  Flexible(
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          employeesDirectory[index]
+                                              ['empDesig']!,
+                                          style: TextStyle(
+                                              //fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                              color: Clrs.dark_Grey),
+                                        ),
                                       ),
                                       flex: 1),
                                   Flexible(
@@ -633,15 +809,17 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                         infoEmpDesignLvl =
                                             employeesDirectory[index]
                                                 ['empDesignLvl']!;
-                                        //here
+                                        infoEmpDvEmail =
+                                            employeesDirectory[index]
+                                                ['empEmail']!;
 
                                         infoAlertCustom();
                                       },
                                       child: Text(
                                         "Info.",
                                         style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
+                                            //fontWeight: FontWeight.bold,
+                                            fontSize: 12,
                                             color: Clrs.dark_Grey),
                                       ),
                                     ),
@@ -776,51 +954,51 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
           ),
         ),
       );
-    } else
+    }
+    else {
       return (Scaffold(
         body: SafeArea(
-          child: Container(
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    Image(
-                      width: 100 * SizeConfig.widthMultiplier,
-                      image: AssetImage(Images.header_other_screens),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(10),
-                      child: GestureDetector(
-                        onTap: () {
-                          // Navigator.pop(context);
-                          Navigator.pushReplacement(context,
-                              MaterialPageRoute(builder: (context) => Home()));
-                        },
-                        child: Image(
-                          width: 10 * SizeConfig.widthMultiplier,
-                          image: AssetImage(Images.back_arrow_ic),
-                        ),
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  Image(
+                    width: 100 * SizeConfig.widthMultiplier,
+                    image: AssetImage(Images.header_other_screens),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: GestureDetector(
+                      onTap: () {
+                        // Navigator.pop(context);
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => Home()));
+                      },
+                      child: Image(
+                        width: 10 * SizeConfig.widthMultiplier,
+                        image: AssetImage(Images.back_arrow_ic),
                       ),
                     ),
-                    Positioned(
-                        top: 40,
-                        width: 100 * SizeConfig.widthMultiplier,
-                        child: Center(
-                            child: Text(
-                          "Employee Directory",
-                          style: TextStyle(color: Clrs.white, fontSize: 20),
-                        )))
-                  ],
-                ),
-                Center(
-                    child: Padding(
-                  padding: const EdgeInsets.all(200.0),
-                  child: CircularProgressIndicator(),
-                )),
-              ],
-            ),
+                  ),
+                  Positioned(
+                      top: 40,
+                      width: 100 * SizeConfig.widthMultiplier,
+                      child: Center(
+                          child: Text(
+                        "Employee Directory",
+                        style: TextStyle(color: Clrs.white, fontSize: 20),
+                      )))
+                ],
+              ),
+              Center(
+                  child: Padding(
+                padding: const EdgeInsets.all(150.0),
+                child: CircularProgressIndicator(color: Colors.grey,),
+              )),
+            ],
           ),
         ),
       ));
+    }
   }
 }

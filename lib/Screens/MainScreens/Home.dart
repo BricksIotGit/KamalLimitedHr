@@ -11,10 +11,8 @@ import 'package:kamal_limited/Screens/MainScreens/OutdoorDutyResquest.dart';
 import 'package:kamal_limited/Screens/MainScreens/Profile.dart';
 import 'package:kamal_limited/Screens/MainScreens/RequestApproval.dart';
 import 'package:kamal_limited/Screens/Setting/UpdateProfile.dart';
-import 'package:kamal_limited/authenticatons/AuthenticationRepo.dart';
 import 'package:kamal_limited/styling/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../styling/images.dart';
 import '../../styling/size_config.dart';
 import '../Starting/Login.dart';
@@ -48,6 +46,12 @@ class _HomeState extends State<Home> {
     'Profile',
   ];
 
+
+  @override
+  void initState() {
+    super.initState();
+
+  }
   @override
   Widget build(BuildContext context) {
     void setResults(String query) {
@@ -66,6 +70,7 @@ class _HomeState extends State<Home> {
       });
       // createPDF();
     }
+
 
     return Scaffold(
       backgroundColor: Clrs.light_Grey,
@@ -488,46 +493,14 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                         ),
+
                         GestureDetector(
                           onTap: () {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        ComplainAndSuggestions()));
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            // color: Colors.teal[100],
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [Clrs.white, Clrs.gradient_Grey],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              color: Clrs.light_Grey,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Image(
-                                  //   height:50* SizeConfig.heightMultiplier,
-                                  width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
-                                  image: AssetImage(Images.employ_ic),
-                                ),
-                                Text('Contact Us')
-                              ],
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Profile()));
+                                  //  builder: (context) => DateDifference()));
+                                     builder: (context) => Profile()));
                           },
                           child: Container(
                             padding: const EdgeInsets.all(8),
@@ -551,37 +524,6 @@ class _HomeState extends State<Home> {
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Profile')
-                              ],
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            //signout
-                            _signOut();
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            // color: Colors.teal[100],
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [Clrs.white, Clrs.gradient_Grey],
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                              color: Clrs.light_Grey,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Image(
-                                  //   height:50* SizeConfig.heightMultiplier,
-                                  width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
-                                  image: AssetImage(Images.employ_ic),
-                                ),
-                                Text('Sign Out')
                               ],
                             ),
                           ),
@@ -618,6 +560,38 @@ class _HomeState extends State<Home> {
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Settings')
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        GestureDetector(
+                          onTap: () {
+                            //signout
+                            _signOut();
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            // color: Colors.teal[100],
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [Clrs.white, Clrs.gradient_Grey],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                              color: Clrs.light_Grey,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image(
+                                  //   height:50* SizeConfig.heightMultiplier,
+                                  width: 30 * SizeConfig.widthMultiplier,
+                                  height: 30 * SizeConfig.widthMultiplier,
+                                  image: AssetImage(Images.employ_ic),
+                                ),
+                                Text('Sign Out')
                               ],
                             ),
                           ),

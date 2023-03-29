@@ -23,6 +23,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final controller = Get.put(LoginUpController());
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +67,8 @@ class _LoginState extends State<Login> {
                 Padding(
                   padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
                   child: TextFormField(
+                    keyboardType: TextInputType.number,
+
                     controller: controller.empID,
                     cursorColor: Clrs.white,
                     style: const TextStyle(color: Colors.white54),
@@ -125,11 +128,23 @@ class _LoginState extends State<Login> {
                 //       ),
                 //     )),
                 Padding(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                  child: isLoading
+                      ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                      : SizedBox(),
+                ),
+                Padding(
                   padding: const EdgeInsets.fromLTRB(0, 70, 0, 10),
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
 
+                        setState(() {
+                          isLoading = true;
+
+                        });
 
                         getLogins(controller.empID.text.trim(),
                             controller.password.text.trim());
@@ -196,6 +211,10 @@ class _LoginState extends State<Login> {
 
     final snapshot = await ref.child('usersLogin/$empID').get();
     if (snapshot.exists) {
+      setState(() {
+        isLoading = false;
+
+      });
       print("Login is v: ${snapshot.value}");
       print("Login is K: ${snapshot.key}");
 
@@ -236,6 +255,10 @@ class _LoginState extends State<Login> {
       }
 
     } else {
+      setState(() {
+        isLoading = false;
+
+      });
       print('No data available.');
       toast("No account exist");
     }

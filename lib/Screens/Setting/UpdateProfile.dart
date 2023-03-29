@@ -39,141 +39,149 @@ class _UpdateProfileState extends State<UpdateProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
-                child: Stack(
-                  children: [
-                    Image(
-                      width: 100 * SizeConfig.widthMultiplier,
-                      image: AssetImage(Images.header_other_screens),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(10),
-                      child: GestureDetector(
-                        onTap: () {
-                          // Navigator.pop(context);
-                          Navigator.pushReplacement(context,
-                              MaterialPageRoute(builder: (context) => Home()));
-                        },
-                        child: Image(
-                          width: 10 * SizeConfig.widthMultiplier,
-                          image: AssetImage(Images.back_arrow_ic),
+    return WillPopScope(
+      onWillPop: () async  {
+        print('The user tries to pop()');
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const Home()));
+        return false;
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                  child: Stack(
+                    children: [
+                      Image(
+                        width: 100 * SizeConfig.widthMultiplier,
+                        image: AssetImage(Images.header_other_screens),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(10),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Navigator.pop(context);
+                            Navigator.pushReplacement(context,
+                                MaterialPageRoute(builder: (context) => Home()));
+                          },
+                          child: Image(
+                            width: 10 * SizeConfig.widthMultiplier,
+                            image: AssetImage(Images.back_arrow_ic),
+                          ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                        top: 40,
-                        width: 100 * SizeConfig.widthMultiplier,
-                        child: Center(
-                            child: Text(
-                          "Settings",
-                          style: TextStyle(color: Clrs.white, fontSize: 20),
-                        )))
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 15, 80),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => Home()));
-                  },
-                  child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        "Skip",
-                        style: TextStyle(color: Clrs.dark_Grey),
-                      )),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
-                child: TextFormField(
-                  controller: myControllerPassword,
-                  cursorColor: Clrs.dark_Grey,
-                  style: const TextStyle(color: Colors.black54),
-                  decoration: const InputDecoration(
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.black54, width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.black54, width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.black54, width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      labelText: 'New Password',
-                      labelStyle: TextStyle(color: Colors.black54)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
-                child: TextFormField(
-                  controller: myController,
-                  // controller: controller.password,
-                  cursorColor: Clrs.black,
-                  style: const TextStyle(color: Colors.black54),
-                  decoration: const InputDecoration(
-                      focusedBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.black54, width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.black54, width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.black54, width: 1.0),
-                        borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                      ),
-                      labelText: 'Confirm Password',
-                      labelStyle: TextStyle(color: Colors.black54)),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 70, 0, 10),
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (myController.text == myControllerPassword.text) {
-                      if (myControllerPassword.text.length < 6) {
-                        toast("Length to short. Try again!");
-                      } else
-                        updateLogins();
-                    } else
-                      toast("Passowrd not matched!");
-                    // if (_formKey.currentState!.validate()) {
-                    //   LoginUpController.instance.loginUser(
-                    //       controller.email.text.trim(),
-                    //       controller.password.text.trim());
-                    // }
-                  },
-                  child: Text('Save',
-                      style: TextStyle(
-                        color: Colors.black,
-                      )),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Clrs.white,
-                    shape: StadiumBorder(),
-                    minimumSize: Size(250, 40),
+                      Positioned(
+                          top: 40,
+                          width: 100 * SizeConfig.widthMultiplier,
+                          child: Center(
+                              child: Text(
+                            "Settings",
+                            style: TextStyle(color: Clrs.white, fontSize: 20),
+                          )))
+                    ],
                   ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 15, 80),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) => Home()));
+                    },
+                    child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          "Skip",
+                          style: TextStyle(color: Clrs.dark_Grey),
+                        )),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
+                  child: TextFormField(
+                    controller: myControllerPassword,
+                    cursorColor: Clrs.dark_Grey,
+                    style: const TextStyle(color: Colors.black54),
+                    decoration: const InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black54, width: 1.0),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black54, width: 1.0),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black54, width: 1.0),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        labelText: 'New Password',
+                        labelStyle: TextStyle(color: Colors.black54)),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
+                  child: TextFormField(
+                    controller: myController,
+                    // controller: controller.password,
+                    cursorColor: Clrs.black,
+                    style: const TextStyle(color: Colors.black54),
+                    decoration: const InputDecoration(
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black54, width: 1.0),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black54, width: 1.0),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black54, width: 1.0),
+                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                        ),
+                        labelText: 'Confirm Password',
+                        labelStyle: TextStyle(color: Colors.black54)),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 70, 0, 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (myController.text == myControllerPassword.text) {
+                        if (myControllerPassword.text.length < 6) {
+                          toast("Length to short. Try again!");
+                        } else
+                          updateLogins();
+                      } else
+                        toast("Passowrd not matched!");
+                      // if (_formKey.currentState!.validate()) {
+                      //   LoginUpController.instance.loginUser(
+                      //       controller.email.text.trim(),
+                      //       controller.password.text.trim());
+                      // }
+                    },
+                    child: Text('Save',
+                        style: TextStyle(
+                          color: Colors.black,
+                        )),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Clrs.white,
+                      shape: StadiumBorder(),
+                      minimumSize: Size(250, 40),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
