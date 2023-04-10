@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:kamal_limited/utils/Toast.dart';
 import 'package:xml/xml.dart' as xml;
 
 import '../../styling/colors.dart';
@@ -21,6 +23,14 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   String dropdownvalueDesig = 'ALL';
   String dropdownvalueDepart = 'ALL';
 
+  String dropDesignQuery='null';
+  String dropDeptQuery='null';
+
+  String query = '';
+  String searchQuery = 'null';
+  List<Map<String, String>> results = [];
+
+
   String infoEmpId = "0000";
   String infoEmpDesignLvl = "0000";
   String infoEmpDvName = "0000";
@@ -29,8 +39,103 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   TextEditingController textController = new TextEditingController();
   bool fetchOrNot = false;
   List<Map<String, String>> employeesDirectory = [];
+  List<Map<String, String>> employeesDirectoryAPISearch = [];
   List<Map<String, String>> employeesDirectoryBackup = [];
 
+  //String username = 'xxhrms';
+  //String password = 'xxhrms';
+  String basicAuth = 'Basic ' + base64.encode(utf8.encode('xxhrms:xxhrms'));
+
+
+  String? selectedDsgn;
+  String? selectedDept;
+
+  onDeptChanged(String? value) {
+
+    print("onDeptChanged value $value");
+    //dont change second dropdown if 1st item didnt change
+    if (value != selectedDsgn) selectedDept = null;
+    setState(() {
+      selectedDsgn = value;
+    });
+
+    dropdownvalueDepart = value!;
+    if (dropdownvalueDepart == "ALL") {
+      dropDeptQuery='null';
+
+    } else {
+      dropDeptQuery="'$dropdownvalueDepart'";
+
+    }
+    dropDesignQuery="null";
+    apiSearch();
+
+  }
+
+  late Map<String, List<String>> dataSetAll = {
+    'ALL':itemsOfDg,
+    'GD - ADMINISTRATION': adminDsgn,
+    'GD - INTERNAL AUDIT': internalAuditDsgn,
+    'GD - COSTING': costingDsgn,
+    'GD - IMPORT &amp; EXPORT': importExportDsgn,
+    'GD - INFORMATION TECHNOLOGY': infoTechDsgn,
+    'GD - HUMAN RESOURCES': humanResourceDsgn,
+  };
+  final List<String> adminDsgn = [
+    'ALL',
+    'DRIVER',
+    'SWEEPER',
+    'OFFICE BOY',
+    'SUPERVISOR',
+    'RECEPTIONIST',
+    'SECURITY GUARD',
+    'GATE CLERK',
+    'CCTV OPERATOR',
+    'ASSISTANT MANAGER',
+    'DEPUTY MANAGER',
+    'EXCHANGE OPERATOR',
+  ];
+  final List<String> internalAuditDsgn = [
+    'ALL',
+    'OFFICER',
+    'INCHARGE',
+    'SENIOR MANAGER',
+    'EXECUTIVE.',
+    'DEPUTY MANAGER',
+  ];
+  final List<String> costingDsgn = [
+    'ALL',
+    'OFFICER',
+    'DEPUTY MANAGER',
+  ];
+
+  final List<String> importExportDsgn = [
+    'ALL',
+    'OFFICER',
+    'SENIOR MANAGER',
+    'ASSISTANT MANAGER',
+  ];
+  final List<String> infoTechDsgn = [
+    'ALL',
+
+    'ASSISTANT NETWORK ADMINISTRATOR',
+    'ASSISTANT BUSINESS ANALYST',
+    'MANAGER',
+    'OFFICER',
+    'ASSISTANT MANAGER',
+  ];
+  final List<String> humanResourceDsgn = [
+    'ALL',
+    'TIME KEEPER',
+    'OFFICER',
+    'EXECUTIVE',
+    'RECRUITMENT ASSOCIATE',
+    'EXECUTIVE.',
+    'DEPUTY MANAGER',
+    'GENERAL MANAGER',
+
+  ];
+  // print(basicAuth);
   var itemsOfDg = [
     'ALL',
     'RECEPTIONIST',
@@ -61,217 +166,122 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
     'GD - ADMINISTRATION',
     'GD - INTERNAL AUDIT',
     'GD - COSTING',
-    'GD - IMPORT & EXPORT',
+    'GD - IMPORT &amp; EXPORT',
     'GD - INFORMATION TECHNOLOGY',
     'GD - HUMAN RESOURCES',
   ];
-  String query = '';
-  List<Map<String, String>> results = [];
 
-  void searchFunc(String search, int first) {
+  void apiSearch() async {
     setState(() {
-      //createPDF();
 
-      print(
-          '2 desig is:  ${dropdownvalueDesig} and dept is:$dropdownvalueDepart');
-      // print("name: ${employeesDirectory[0]['ename']}");
+     fetchOrNot = false;
+    });
+    employeesDirectory.clear();
+    var concatName="";
 
-      if (first == 1 &&
-          dropdownvalueDepart == "ALL" &&
-          dropdownvalueDesig == "ALL") {
-        print('1');
+    if(searchQuery=='null'){
+      concatName="null";
+    }else{
+      concatName="'%$searchQuery%'";
+    }
 
-        results = employeesDirectoryBackup
-            .where((elem) =>
-                // elem['empDesig']
-                //     .toString()
-                //     .toLowerCase()
-                //     .contains(query.toLowerCase()) ||
-                elem['ename']
-                    .toString()
-                    .toLowerCase()
-                    .contains(query.toLowerCase()))
-            .toList();
+   // print("apiserrr $searchQuery and $concatName and $dropDeptQuery and $dropDesignQuery");
+    var requestBody =
+        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DIRECTORY">
+             <soapenv:Header/>
+             <soapenv:Body>
+            <get:GET_EMP_DIRECTORYInput>
+             <get:P_OUTPUT-XMLTYPE-OUT/>
+            <get:P_ENAME-VARCHAR2-IN>${concatName.toUpperCase()}</get:P_ENAME-VARCHAR2-IN>
+             <get:P_EMP_ID-VARCHAR2-IN>null</get:P_EMP_ID-VARCHAR2-IN>
+             <get:P_EMP_DESIGNATION-VARCHAR2-IN>$dropDesignQuery</get:P_EMP_DESIGNATION-VARCHAR2-IN>
+             <get:P_EMP_DEPARTMENT-VARCHAR2-IN>$dropDeptQuery</get:P_EMP_DEPARTMENT-VARCHAR2-IN>
+              </get:GET_EMP_DIRECTORYInput>
+            </soapenv:Body>
+              </soapenv:Envelope>''';
 
-        employeesDirectory = results;
-      } else if (first == 1 &&
-          dropdownvalueDepart != "ALL" &&
-          dropdownvalueDesig == "ALL") {
-        print('2');
+    var response = await post(
+      Uri.parse('http://202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_DIRECTORY'),
+      headers: {
+        'content-type': 'text/xml; charset=utf-8',
+        'authorization': basicAuth
+      },
+      body: utf8.encode(requestBody),
+    );
 
-        // results = employeesDirectoryBackup
-        //      .where((elem) =>
-        //  elem['empDpt']
-        //      .toString()
-        //      .toLowerCase()
-        //      .contains(query.toLowerCase()))
-        //      .toList();
+    print("Response status: ${response.statusCode}");
+    if (response.statusCode == 200) {
+      setState(() {
+        fetchOrNot = true;
+      });
+    }
+    // Parse XML data
+    var xmlSP = response.body.toString();
 
-        print("Length 1: ${results.length}");
-        results = results
-            .where((elem) => elem['ename']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
-        print("Length 2: ${results.length}");
+    final document = xml.XmlDocument.parse(xmlSP);
+   // print("search Response document: ${document}");
+    print(
+        "Response document length: ${document.findAllElements('ROWSET').length}");
 
-        employeesDirectory = results;
-      } else if (first == 1 &&
-          dropdownvalueDepart != "ALL" &&
-          dropdownvalueDesig != "ALL") {
-        print("3");
-        results = employeesDirectoryBackup
-            .where((elem) => elem['ename']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
+    if(document.findAllElements('ROWSET').isEmpty){
+      toast("No data available for this query");
+    }
 
-        // results = results
-        //     .where((elem) =>
-        // elem['empDpt']
-        //     .toString()
-        //     .toLowerCase()
-        //     .contains(query.toLowerCase()))
-        //     .toList();
-        //
-        // results = results
-        //     .where((elem) =>
-        // elem['empDesig']
-        //     .toString()
-        //     .toLowerCase()
-        //     .contains(query.toLowerCase()))
-        //     .toList();
+    else{
+      final rowset = document.findAllElements('ROWSET').last;
 
-        employeesDirectory = results;
-      } else if (first == 1 &&
-          dropdownvalueDepart == "ALL" &&
-          dropdownvalueDesig != "ALL") {
-        print("4");
-        results = employeesDirectoryBackup
-            .where((elem) => elem['ename']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
+      // print("Response employeesNode: ${rowset}");
 
-        results = results
-            .where((elem) => elem['empDpt']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
+      for (var row in rowset.findAllElements('ROW')) {
+        final empId = row.findElements('EMP_ID').single.text;
+        final ename = row.findElements('ENAME').single.text;
+        final fname = row.findElements('FNAME').single.text;
+        final gndr = row.findElements('GNDR').single.text;
+        final empDpt = row.findElements('EMP_DEPARTMENT').single.text;
+        final empDesig = row.findElements('EMP_DESIGNATION').single.text;
+        final doj = row.findElements('DOJ').single.text;
+        final doc = (row.findElements('DOC').isNotEmpty)
+            ? row.findElements('DOC').single.text
+            : "";
+        final empEmail = (row.findElements('EMAIL').isNotEmpty)
+            ? row.findElements('EMAIL').single.text
+            : "";
 
-        results = results
-            .where((elem) => elem['empDesig']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
+        final empType = row.findElements('EMP_TYPE').single.text;
 
-        employeesDirectory = results;
+        final empShift = row.findElements('EMP_SHIFT').single.text;
+        final empDvName = row.findElements('DIV_NAME').single.text;
+        final empDesignLvl = row.findElements('EMP_DESIGNATION_LVL').single.text;
+
+        employeesDirectoryAPISearch.add({
+          'empId': empId,
+          'ename': ename,
+          'fname': fname,
+          'gndr': gndr,
+          'empDpt': empDpt,
+          'empDesig': empDesig,
+          'doj': doj,
+          'doc': doc,
+          'empType': empType,
+          'empEmail': empEmail,
+          'empShift': empShift,
+          'empDvName': empDvName,
+          'empDesignLvl': empDesignLvl,
+        });
+
+        employeesDirectoryBackup = employeesDirectoryAPISearch;
       }
+      setState(() {
 
-      //  print("resul 2: ${results}");
-      // print("resul ${results[0]['ename']}");
-      //print("length before ${employeesDirectory.length}");
-
-      // employeesDirectory = results;
-      // print("length after ${employeesDirectory.length}");
-    });
-  }
-
-  void setResults(String query) {
-    setState(() {
-      //createPDF();
-      print('row is ${employeesDirectory}');
-      print("name: ${employeesDirectory[0]['ename']}");
-
-      results = employeesDirectory
-          .where((elem) =>
-              // elem['empDesig']
-              //     .toString()
-              //     .toLowerCase()
-              //     .contains(query.toLowerCase()) ||
-              elem['ename']
-                  .toString()
-                  .toLowerCase()
-                  .contains(query.toLowerCase()))
-          .toList();
-
-      //  print("resul 2: ${results}");
-      print("resul ${results[0]['ename']}");
-
-      // print("length before ${employeesDirectory.length}");
-
-      employeesDirectory = results;
-      // print("length after ${employeesDirectory.length}");
-    });
-    // createPDF();
-  }
-
-  void setResultsDropDept(String query) {
-    setState(() {
-      results = employeesDirectoryBackup
-          .where((elem) => elem['empDpt']
-              .toString()
-              .toLowerCase()
-              .contains(query.toLowerCase()))
-          .toList();
-      employeesDirectory = results;
-    });
-    // createPDF();
-  }
-
-  void setResultsDropDown(String query) {
-    setState(() {
-      //createPDF();
-      print('EM length: ${employeesDirectory.length}');
-      print('EMB length: ${employeesDirectoryBackup.length}');
-      //  print("name: ${employeesDirectory[0]['ename']}");
-
-      if (employeesDirectory.length == employeesDirectoryBackup.length) {
-        results = employeesDirectoryBackup
-            .where((elem) => elem['empDesig']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
-        employeesDirectory = results;
-      } else if (employeesDirectory.length == 0) {
-        results = employeesDirectoryBackup
-            .where((elem) => elem['empDpt']
-                .toString()
-                .toLowerCase()
-                .contains(dropdownvalueDepart.toLowerCase()))
-            .toList();
-        employeesDirectory = results;
-        //setResultsDropDown(query);
-      } else {
-        results = employeesDirectory
-            .where((elem) => elem['empDesig']
-                .toString()
-                .toLowerCase()
-                .contains(query.toLowerCase()))
-            .toList();
-        employeesDirectory = results;
-      }
-
-      //  print("resul 2: ${results}");
-      // print("resul ${results[0]['ename']}");
-
-      // print("length before ${employeesDirectory.length}");
-
-      //  print("length after ${employeesDirectory.length}");
-    });
-    // createPDF();
+        employeesDirectory = employeesDirectoryAPISearch;
+      //  print("lissssst $employeesDirectory");
+      //  print("lissssst $employeesDirectory");
+      });
+    }
   }
 
   void reasign() {
     setState(() {
-      // hitApi();
-
       employeesDirectory = employeesDirectoryBackup;
     });
   }
@@ -283,20 +293,17 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   }
 
   hitApi() async {
-    String username = 'xxhrms';
-    String password = 'xxhrms';
-    String basicAuth =
-        'Basic ' + base64.encode(utf8.encode('$username:$password'));
-    print(basicAuth);
-
     // 70500195 188700001 70500145 70500274
-    var requestBody = '''<?xml version="1.0" encoding="utf-8"?>
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DIRECTORY">
+    var requestBody =
+        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DIRECTORY">
    <soapenv:Header/>
    <soapenv:Body>
       <get:GET_EMP_DIRECTORYInput>
          <get:P_OUTPUT-XMLTYPE-OUT/>
-         <get:P_EMP_ID-NUMBER-IN>null</get:P_EMP_ID-NUMBER-IN>
+         <get:P_ENAME-VARCHAR2-IN>null</get:P_ENAME-VARCHAR2-IN>
+         <get:P_EMP_ID-VARCHAR2-IN>null</get:P_EMP_ID-VARCHAR2-IN>
+         <get:P_EMP_DESIGNATION-VARCHAR2-IN>null</get:P_EMP_DESIGNATION-VARCHAR2-IN>
+         <get:P_EMP_DEPARTMENT-VARCHAR2-IN>null</get:P_EMP_DEPARTMENT-VARCHAR2-IN>
       </get:GET_EMP_DIRECTORYInput>
    </soapenv:Body>
 </soapenv:Envelope>''';
@@ -376,7 +383,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   void infoAlertCustom() {
     Dialog errorDialog = Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      //this right here
+
       child: Container(
         height: 300.0,
         width: 300.0,
@@ -446,516 +453,560 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   Widget build(BuildContext context) {
     if (fetchOrNot) {
       return WillPopScope(
-
-        onWillPop: () async  {
+        onWillPop: () async {
           print('The user tries to pop()');
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (context) => const Home()));
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => const Home()));
           return false;
         },
         child: Scaffold(
           body: SafeArea(
-            child: Column(
-              children: [
-                Stack(
-                  children: [
-                    Image(
-                      //   height:50* SizeConfig.heightMultiplier,
-                      width: 100 * SizeConfig.widthMultiplier,
-                      image: AssetImage(Images.header_grey),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(10),
-                      child: GestureDetector(
-                        onTap: () {
-                          // Navigator.pop(context);
-                          Navigator.pushReplacement(context,
-                              MaterialPageRoute(builder: (context) => const Home()));
-                        },
-                        child: Image(
-                          width: 10 * SizeConfig.widthMultiplier,
-                          image: AssetImage(Images.back_arrow_ic),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Stack(
+                    children: [
+                      Image(
+                        //   height:50* SizeConfig.heightMultiplier,
+                        width: 100 * SizeConfig.widthMultiplier,
+                        image: AssetImage(Images.header_grey),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(10),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Navigator.pop(context);
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Home()));
+                          },
+                          child: Image(
+                            width: 10 * SizeConfig.widthMultiplier,
+                            image: AssetImage(Images.back_arrow_ic),
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 40, 0, 20),
-                      child: Center(
-                          child: Text(
-                        "Employee Directory",
-                        style: TextStyle(color: Clrs.white, fontSize: 20),
-                      )),
-                    ),
-                    Positioned(
-                      top: 8 * SizeConfig.heightMultiplier,
-                      width: 100 * SizeConfig.widthMultiplier,
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Container(
-                          //  color: Clrs.white,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            //Center Row contents horizontally,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 40, 0, 20),
+                        child: Center(
+                            child: Text(
+                          "Employee Directory",
+                          style: TextStyle(color: Clrs.white, fontSize: 20),
+                        )),
+                      ),
+                      Positioned(
+                        top: 8 * SizeConfig.heightMultiplier,
+                        width: 100 * SizeConfig.widthMultiplier,
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Container(
+                            //  color: Clrs.white,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              //Center Row contents horizontally,
 
-                            children: [
-                              Container(
-                                //color: Colors.white,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: Colors.white,
-                                  // boxShadow: [
-                                  //   BoxShadow(color: Colors.grey, spreadRadius: 3),
-                                  // ],
-                                ),
-                                child: SizedBox(
-                                  width: SizeConfig.widthMultiplier * 75,
-                                  child: CupertinoSearchTextField(
-                                    controller: textController,
-                                    autocorrect: true,
-                                    onChanged: (v) {
-                                      setState(() {
-                                        query = v;
-                                        if (query.isEmpty) {
-                                          reasign();
-                                        }
+                              children: [
+                                Container(
+                                  //color: Colors.white,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: Colors.white,
+                                    // boxShadow: [
+                                    //   BoxShadow(color: Colors.grey, spreadRadius: 3),
+                                    // ],
+                                  ),
+                                  child: SizedBox(
+                                    width: SizeConfig.widthMultiplier * 75,
+                                    child: CupertinoSearchTextField(
+                                      controller: textController,
+                                      autocorrect: true,
+                                      onChanged: (v) {
 
-                                        searchFunc(query, 1);
-                                      });
-                                    },
+                                      },
+                                      onSubmitted: (v){
+                                        setState(() {
+                                          query = v;
+                                          if (query.isEmpty) {
+                                            searchQuery='null';
+                                            reasign();
+                                          }else{
+                                            searchQuery=v;
+
+                                          }
+
+                                                  apiSearch();
+
+
+                                        });
+                                      },
+                                    ),
                                   ),
                                 ),
-                              ),
-                              // AnimSearchBar(
-                              //   width: 90 * SizeConfig.widthMultiplier,
-                              //   textController: textController,
-                              //   onSuffixTap: () {
-                              //     setState(() {
-                              //       textController.clear();
-                              //     });
-                              //   },
-                              //   onSubmitted: (String) {},
-                              // ),
-                              // Image(
-                              //   //   height:50* SizeConfig.heightMultiplier,
-                              //   width: 10 * SizeConfig.widthMultiplier,
-                              //   image: AssetImage(Images.search_ic),
-                              // ),
-                              Image(
-                                //   height:50* SizeConfig.heightMultiplier,
-                                width: 10 * SizeConfig.widthMultiplier,
-                                image: AssetImage(Images.notification_ic),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 15, 30, 15),
-                      child: Container(
-                        width: 35 * SizeConfig.widthMultiplier,
-                        child: SizedBox(
-                          width: 30 * SizeConfig.widthMultiplier,
-                          child: DropdownButtonFormField(
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.only(
-                                  top: 5, bottom: 5, left: 10, right: 5),
-                              //this one
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Clrs.light_Grey, width: 1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Clrs.light_Grey, width: 1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Clrs.light_Grey, width: 1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              filled: true,
-                              fillColor: Clrs.medium_Grey,
+                                Image(
+                                  //   height:50* SizeConfig.heightMultiplier,
+                                  width: 10 * SizeConfig.widthMultiplier,
+                                  image: AssetImage(Images.notification_ic),
+                                ),
+                              ],
                             ),
-                            dropdownColor: Clrs.light_Grey,
-                            // Initial Value
-                            value: dropdownvalueDepart,
-                            // Down Arrow Ico
-                            icon: const Icon(Icons.keyboard_arrow_down),
-                            // Array list of items
-                            items: itemsOfdept.map((String items) {
-                              return DropdownMenuItem(
-                                value: items,
-                                child: Text(items),
-                              );
-                            }).toList(),
-                            onTap: () {},
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                dropdownvalueDepart = newValue!;
-                                if (dropdownvalueDepart == "ALL") {
-                                  reasign();
-                                } else {
-                                  setResultsDropDept(dropdownvalueDepart);
-                                }
-                              });
-                            },
                           ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(30, 15, 30, 15),
-                      child: Container(
-                        width: 35 * SizeConfig.widthMultiplier,
-                        child: SizedBox(
-                          width: 30 * SizeConfig.widthMultiplier,
-                          child: DropdownButtonFormField(
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.only(
-                                  top: 5, bottom: 5, left: 10, right: 5),
-                              //this one
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Clrs.light_Grey, width: 1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Clrs.light_Grey, width: 1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Clrs.light_Grey, width: 1),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              filled: true,
-                              fillColor: Clrs.medium_Grey,
+                      Positioned(
+                        top: 14.8 *SizeConfig.heightMultiplier,
+                       left:57* SizeConfig.widthMultiplier,
+                        child: OutlinedButton(
+                          child: Text(
+                            "Clear filters",
+                            style: TextStyle(
+                              color: Colors.white,
                             ),
-                            dropdownColor: Clrs.light_Grey,
-                            // Initial Value
-                            value: dropdownvalueDesig,
-                            // Down Arrow Ico
-                            icon: const Icon(Icons.keyboard_arrow_down),
-                            // Array list of items
-                            items: itemsOfDg.map((String items) {
-                              return DropdownMenuItem(
-                                value: items,
-                                child: Text(items),
-                              );
-                            }).toList(),
-                            onTap: () {},
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                dropdownvalueDesig = newValue!;
-                                print(
-                                    "value Drup $dropdownvalueDesig and $newValue");
-                                if (dropdownvalueDesig == "ALL") {
-                                  reasign();
-                                } else {
-                                  setResultsDropDown(dropdownvalueDesig);
-                                }
-                              });
-                            },
+                          ),
+                          onPressed: () {
+                            selectedDsgn=null;
+                             selectedDept=null;
+                            textController.text="";
+                            searchQuery="null";
+                            dropDeptQuery="null";
+                            dropDesignQuery="null";
+                            dropdownvalueDesig = 'ALL';
+                              dropdownvalueDepart = 'ALL';
+                            setState(() {
+                             apiSearch();
+
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
+                        child: SizedBox(
+                          width: 85 * SizeConfig.widthMultiplier,
+                          child: SizedBox(
+                            width: 30 * SizeConfig.widthMultiplier,
+                            child: DropdownButtonFormField(
+
+                                isExpanded: true,
+                                decoration: InputDecoration(
+                                  contentPadding: const EdgeInsets.only(
+                                      top: 5, bottom: 5, left: 10, right: 5),
+                                  //this one
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Clrs.light_Grey, width: 1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Clrs.light_Grey, width: 1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Clrs.light_Grey, width: 1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  filled: true,
+                                  fillColor: Clrs.medium_Grey,
+                                ),
+                                dropdownColor: Clrs.light_Grey,
+                                // Initial Value
+                                value: selectedDsgn,
+                                // Down Arrow Ico
+                                icon: const Icon(Icons.keyboard_arrow_down),
+                                // Array list of items
+                                items: dataSetAll.keys.map((String items) {
+                                  return DropdownMenuItem(
+                                    value: items,
+                                    child: Text(items),
+                                  );
+                                }).toList(),
+                                onTap: () {},
+                                onChanged: onDeptChanged
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Clrs.medium_Grey),
-                      borderRadius: BorderRadius.circular(10),
-                      color: Clrs.light_Grey,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Flexible(
-                              fit: FlexFit.loose,
-                              child: Text(
-                                "Sr.",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Clrs.dark_Grey),
+
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(30, 5, 30, 15),
+                        child: Container(
+                          width: 85 * SizeConfig.widthMultiplier,
+                          child: SizedBox(
+                            width: 30 * SizeConfig.widthMultiplier,
+                            child: DropdownButtonFormField(
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                contentPadding: const EdgeInsets.only(
+                                    top: 5, bottom: 5, left: 10, right: 5),
+                                //this one
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Clrs.light_Grey, width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Clrs.light_Grey, width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Clrs.light_Grey, width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                filled: true,
+                                fillColor: Clrs.medium_Grey,
                               ),
-                              flex: 0),
-                          Flexible(
-                              child: Align(
-                                alignment: Alignment.centerLeft,
+                              dropdownColor: Clrs.light_Grey,
+                              // Initial Value
+                              value: selectedDept,
+                              // Down Arrow Ico
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              // Array list of items
+                              items: (dataSetAll[selectedDsgn] ?? []).map((String items) {
+                                print("TEST list $items");
+                                return DropdownMenuItem(
+                                  value: items,
+                                  child: Text(items),
+                                );
+                              }).toList(),
+                              onTap: () {},
+                              onChanged: (String? newValue) {
+                                try{
+                                  setState(() {
+                                    selectedDept=newValue;
+                                    dropdownvalueDesig = newValue!;
+                                    print(
+                                        "value Drup $dropdownvalueDesig and $newValue");
+                                    if (dropdownvalueDesig == "ALL") {
+                                      dropDesignQuery='null';
+                                    } else {
+                                      dropDesignQuery="'$dropdownvalueDesig'";
+                                    }
+                                    apiSearch();
+                                  });
+                                }
+                              catch (e){
+                                  print("$e");
+                              }
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // abouve new
+                  // Column(
+                  //   children: [
+                  //     Padding(
+                  //       padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
+                  //       child: Container(
+                  //         width: 85 * SizeConfig.widthMultiplier,
+                  //         child: SizedBox(
+                  //           width: 30 * SizeConfig.widthMultiplier,
+                  //           child: DropdownButtonFormField(
+                  //             isExpanded: true,
+                  //             decoration: InputDecoration(
+                  //               contentPadding: const EdgeInsets.only(
+                  //                   top: 5, bottom: 5, left: 10, right: 5),
+                  //               //this one
+                  //               focusedBorder: OutlineInputBorder(
+                  //                 borderSide: BorderSide(
+                  //                     color: Clrs.light_Grey, width: 1),
+                  //                 borderRadius: BorderRadius.circular(10),
+                  //               ),
+                  //               enabledBorder: OutlineInputBorder(
+                  //                 borderSide: BorderSide(
+                  //                     color: Clrs.light_Grey, width: 1),
+                  //                 borderRadius: BorderRadius.circular(10),
+                  //               ),
+                  //               border: OutlineInputBorder(
+                  //                 borderSide: BorderSide(
+                  //                     color: Clrs.light_Grey, width: 1),
+                  //                 borderRadius: BorderRadius.circular(10),
+                  //               ),
+                  //               filled: true,
+                  //               fillColor: Clrs.medium_Grey,
+                  //             ),
+                  //             dropdownColor: Clrs.light_Grey,
+                  //             // Initial Value
+                  //             value: dropdownvalueDepart,
+                  //             // Down Arrow Ico
+                  //             icon: const Icon(Icons.keyboard_arrow_down),
+                  //             // Array list of items
+                  //             items: itemsOfdept.map((String items) {
+                  //               return DropdownMenuItem(
+                  //                 value: items,
+                  //                 child: Text(items),
+                  //               );
+                  //             }).toList(),
+                  //             onTap: () {},
+                  //             onChanged: (String? newValue) {
+                  //               setState(() {
+                  //                 dropdownvalueDepart = newValue!;
+                  //                 if (dropdownvalueDepart == "ALL") {
+                  //                   dropDeptQuery='null';
+                  //                   //reasign();
+                  //                 } else {
+                  //                   dropDeptQuery="'$dropdownvalueDepart'";
+                  //                   //setResultsDropDept(dropdownvalueDepart);
+                  //                 }
+                  //                 apiSearch();
+                  //
+                  //               });
+                  //             },
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //     Padding(
+                  //       padding: const EdgeInsets.fromLTRB(30, 5, 30, 15),
+                  //       child: Container(
+                  //         width: 85 * SizeConfig.widthMultiplier,
+                  //         child: SizedBox(
+                  //           width: 30 * SizeConfig.widthMultiplier,
+                  //           child: DropdownButtonFormField(
+                  //             isExpanded: true,
+                  //             decoration: InputDecoration(
+                  //               contentPadding: const EdgeInsets.only(
+                  //                   top: 5, bottom: 5, left: 10, right: 5),
+                  //               //this one
+                  //               focusedBorder: OutlineInputBorder(
+                  //                 borderSide: BorderSide(
+                  //                     color: Clrs.light_Grey, width: 1),
+                  //                 borderRadius: BorderRadius.circular(10),
+                  //               ),
+                  //               enabledBorder: OutlineInputBorder(
+                  //                 borderSide: BorderSide(
+                  //                     color: Clrs.light_Grey, width: 1),
+                  //                 borderRadius: BorderRadius.circular(10),
+                  //               ),
+                  //               border: OutlineInputBorder(
+                  //                 borderSide: BorderSide(
+                  //                     color: Clrs.light_Grey, width: 1),
+                  //                 borderRadius: BorderRadius.circular(10),
+                  //               ),
+                  //               filled: true,
+                  //               fillColor: Clrs.medium_Grey,
+                  //             ),
+                  //             dropdownColor: Clrs.light_Grey,
+                  //             // Initial Value
+                  //             value: dropdownvalueDesig,
+                  //             // Down Arrow Ico
+                  //             icon: const Icon(Icons.keyboard_arrow_down),
+                  //             // Array list of items
+                  //             items: itemsOfDg.map((String items) {
+                  //               return DropdownMenuItem(
+                  //                 value: items,
+                  //                 child: Text(items),
+                  //               );
+                  //             }).toList(),
+                  //             onTap: () {},
+                  //             onChanged: (String? newValue) {
+                  //               setState(() {
+                  //                 dropdownvalueDesig = newValue!;
+                  //                 print(
+                  //                     "value Drup $dropdownvalueDesig and $newValue");
+                  //
+                  //                 // print(
+                  //                 //     "value Drup $dropdownvalueDesig and $newValue");
+                  //                 if (dropdownvalueDesig == "ALL") {
+                  //                   dropDesignQuery='null';
+                  //                   // reasign();
+                  //                 } else {
+                  //                   dropDesignQuery="'$dropdownvalueDesig'";
+                  //                   // setResultsDropDown(dropdownvalueDesig);
+                  //                 }
+                  //
+                  //                 apiSearch();
+                  //               });
+                  //             },
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Clrs.medium_Grey),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Clrs.light_Grey,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Flexible(
+                                fit: FlexFit.loose,
                                 child: Text(
-                                  "Name",
+                                  "Sr.",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                       color: Clrs.dark_Grey),
                                 ),
-                              ),
-                              flex: 1),
-                          Flexible(
-                              child: Text(
-                                "Dept.",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Clrs.dark_Grey),
-                              ),
-                              flex: 1),
-                          Flexible(
-                              child: Text(
-                                "Designation",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Clrs.dark_Grey),
-                              ),
-                              flex: 1),
-                          Flexible(
-                              child: Text(
-                                "Status",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Clrs.dark_Grey),
-                              ),
-                              flex: 1)
-                        ],
+                                flex: 0),
+                            Flexible(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "Name",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        color: Clrs.dark_Grey),
+                                  ),
+                                ),
+                                flex: 1),
+                            Flexible(
+                                child: Text(
+                                  "Dept.",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Clrs.dark_Grey),
+                                ),
+                                flex: 1),
+                            Flexible(
+                                child: Text(
+                                  "Designation",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Clrs.dark_Grey),
+                                ),
+                                flex: 1),
+                            Flexible(
+                                child: Text(
+                                  "Status",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Clrs.dark_Grey),
+                                ),
+                                flex: 1)
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: ListView.builder(
-                      itemCount: employeesDirectory.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Clrs.medium_Grey),
-                              borderRadius: BorderRadius.circular(10),
-                              color: Clrs.white,
-                            ),
-                            child: ListTile(
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Flexible(
-                                      child: Text(
-                                        "${index + 1}",
-                                        style: TextStyle(
-                                            //fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                            color: Clrs.dark_Grey),
-                                      ),
-                                      flex: 0),
-                                  Flexible(
-                                      child: Text(
-                                        employeesDirectory[index]['ename']!,
-                                        style: TextStyle(
-                                            //fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                            color: Clrs.dark_Grey),
-                                      ),
-                                      flex: 1),
-                                  Flexible(
-                                      child: Text(
-                                        employeesDirectory[index]['empDpt']!,
-                                        style: TextStyle(
-                                            //fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                            color: Clrs.dark_Grey),
-                                      ),
-                                      flex: 1),
-                                  Flexible(
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
+                  SizedBox(
+
+                    height: 50*SizeConfig.heightMultiplier,
+                    child: Padding(
+
+                      padding: const EdgeInsets.all(10.0),
+                      child: ListView.builder(
+                        itemCount: employeesDirectory.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Clrs.medium_Grey),
+                                borderRadius: BorderRadius.circular(10),
+                                color: Clrs.white,
+                              ),
+                              child: ListTile(
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Flexible(
                                         child: Text(
-                                          employeesDirectory[index]
-                                              ['empDesig']!,
+                                          "${index + 1}",
+                                          style: TextStyle(
+                                              //fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                              color: Clrs.dark_Grey),
+                                        ),
+                                        flex: 0),
+                                    Flexible(
+                                        child: Text(
+                                          employeesDirectory[index]['ename']!,
+                                          style: TextStyle(
+                                              //fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                              color: Clrs.dark_Grey),
+                                        ),
+                                        flex: 1),
+                                    Flexible(
+                                        child: Text(
+                                          employeesDirectory[index]['empDpt']!,
+                                          style: TextStyle(
+                                              //fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                              color: Clrs.dark_Grey),
+                                        ),
+                                        flex: 1),
+                                    Flexible(
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            employeesDirectory[index]
+                                                ['empDesig']!,
+                                            style: TextStyle(
+                                                //fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                                color: Clrs.dark_Grey),
+                                          ),
+                                        ),
+                                        flex: 1),
+                                    Flexible(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          infoEmpId =
+                                              employeesDirectory[index]['empId']!;
+                                          infoEmpDvName =
+                                              employeesDirectory[index]
+                                                  ['empDvName']!;
+                                          infoEmpDesignLvl =
+                                              employeesDirectory[index]
+                                                  ['empDesignLvl']!;
+                                          infoEmpDvEmail =
+                                              employeesDirectory[index]
+                                                  ['empEmail']!;
+
+                                          infoAlertCustom();
+                                        },
+                                        child: Text(
+                                          "Info.",
                                           style: TextStyle(
                                               //fontWeight: FontWeight.bold,
                                               fontSize: 12,
                                               color: Clrs.dark_Grey),
                                         ),
                                       ),
-                                      flex: 1),
-                                  Flexible(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        infoEmpId =
-                                            employeesDirectory[index]['empId']!;
-                                        infoEmpDvName =
-                                            employeesDirectory[index]
-                                                ['empDvName']!;
-                                        infoEmpDesignLvl =
-                                            employeesDirectory[index]
-                                                ['empDesignLvl']!;
-                                        infoEmpDvEmail =
-                                            employeesDirectory[index]
-                                                ['empEmail']!;
-
-                                        infoAlertCustom();
-                                      },
-                                      child: Text(
-                                        "Info.",
-                                        style: TextStyle(
-                                            //fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                            color: Clrs.dark_Grey),
-                                      ),
-                                    ),
-                                  )
-                                ],
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                )
+                  )
 
-                // Padding(
-                //   padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Clrs.medium_Grey),
-                //       borderRadius: BorderRadius.circular(10),
-                //       color: Clrs.white,
-                //     ),
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(15.0),
-                //       child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //         children: [
-                //           Text("1.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Ali",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("GM Manager",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Hr",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Info.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),)
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Clrs.medium_Grey),
-                //       borderRadius: BorderRadius.circular(10),
-                //       color: Clrs.white,
-                //     ),
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(15.0),
-                //       child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //         children: [
-                //           Text("1.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Ali",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("GM Manager",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Hr",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Info.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),)
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Clrs.medium_Grey),
-                //       borderRadius: BorderRadius.circular(10),
-                //       color: Clrs.white,
-                //     ),
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(15.0),
-                //       child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //         children: [
-                //           Text("1.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Ali",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("GM Manager",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Hr",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Info.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),)
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Clrs.medium_Grey),
-                //       borderRadius: BorderRadius.circular(10),
-                //       color: Clrs.white,
-                //     ),
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(15.0),
-                //       child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //         children: [
-                //           Text("2.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Ali",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("GM Manager",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Hr",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Info.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),)
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // Padding(
-                //   padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
-                //   child: Container(
-                //     decoration: BoxDecoration(
-                //       border: Border.all(color: Clrs.medium_Grey),
-                //       borderRadius: BorderRadius.circular(10),
-                //       color: Clrs.white,
-                //     ),
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(15.0),
-                //       child: Row(
-                //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //         children: [
-                //           Text("1.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Ali",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("GM Manager",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Hr",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),),
-                //           Text("Info.",style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14 ,color: Clrs.dark_Grey),)
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       );
-    }
-    else {
+    } else {
       return (Scaffold(
         body: SafeArea(
           child: Column(
@@ -964,7 +1015,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                 children: [
                   Image(
                     width: 100 * SizeConfig.widthMultiplier,
-                    image: AssetImage(Images.header_other_screens),
+                    image: AssetImage(Images.header_grey),
                   ),
                   Padding(
                     padding: EdgeInsets.all(10),
@@ -987,13 +1038,190 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                           child: Text(
                         "Employee Directory",
                         style: TextStyle(color: Clrs.white, fontSize: 20),
-                      )))
+                      ))),
+                  Positioned(
+                    top: 8 * SizeConfig.heightMultiplier,
+                    width: 100 * SizeConfig.widthMultiplier,
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Container(
+                        //  color: Clrs.white,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          //Center Row contents horizontally,
+
+                          children: [
+                            Container(
+                              //color: Colors.white,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                                // boxShadow: [
+                                //   BoxShadow(color: Colors.grey, spreadRadius: 3),
+                                // ],
+                              ),
+                              child: SizedBox(
+                                width: SizeConfig.widthMultiplier * 75,
+                                child: CupertinoSearchTextField(
+                                  controller: textController,
+                                  autocorrect: true,
+                                  onChanged: (v) {
+                                    setState(() {
+                                      query = v;
+                                      // if (query.isEmpty) {
+                                      //   reasign();
+                                      // }
+
+                                      // apiSearch(query);
+                                      //  searchFunc(query, 1);
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            Image(
+                              //   height:50* SizeConfig.heightMultiplier,
+                              width: 10 * SizeConfig.widthMultiplier,
+                              image: AssetImage(Images.notification_ic),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
+                    child: Container(
+                      width: 85 * SizeConfig.widthMultiplier,
+                      child: SizedBox(
+                        width: 30 * SizeConfig.widthMultiplier,
+                        child: DropdownButtonFormField(
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(
+                                top: 5, bottom: 5, left: 10, right: 5),
+                            //this one
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: Clrs.medium_Grey,
+                          ),
+                          dropdownColor: Clrs.light_Grey,
+                          // Initial Value
+                          value: dropdownvalueDepart,
+                          // Down Arrow Ico
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          // Array list of items
+                          items: itemsOfdept.map((String items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Text(items),
+                            );
+                          }).toList(),
+                          onTap: () {},
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              dropdownvalueDepart = newValue!;
+                              // if (dropdownvalueDepart == "ALL") {
+                              //   reasign();
+                              // } else {
+                              //   setResultsDropDept(dropdownvalueDepart);
+                              // }
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(30, 5, 30, 15),
+                    child: Container(
+                      width: 85 * SizeConfig.widthMultiplier,
+                      child: SizedBox(
+                        width: 30 * SizeConfig.widthMultiplier,
+                        child: DropdownButtonFormField(
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(
+                                top: 5, bottom: 5, left: 10, right: 5),
+                            //this one
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: Clrs.medium_Grey,
+                          ),
+                          dropdownColor: Clrs.light_Grey,
+                          // Initial Value
+                          value: dropdownvalueDesig,
+                          // Down Arrow Ico
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          // Array list of items
+                          items: itemsOfDg.map((String items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Text(items),
+                            );
+                          }).toList(),
+                          onTap: () {},
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              dropdownvalueDesig = newValue!;
+
+
+                              // // print(
+                              // //     "value Drup $dropdownvalueDesig and $newValue");
+                              // if (dropdownvalueDesig == "ALL") {
+                              //   dropDesignQuery='null';
+                              //  // reasign();
+                              // } else {
+                              //   dropDesignQuery=dropdownvalueDesig;
+                              //  // setResultsDropDown(dropdownvalueDesig);
+                              // }
+                              // apiSearch();
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               Center(
                   child: Padding(
-                padding: const EdgeInsets.all(150.0),
-                child: CircularProgressIndicator(color: Colors.grey,),
+                padding: const EdgeInsets.all(20.0),
+                child: CircularProgressIndicator(
+                  color: Colors.grey,
+                ),
               )),
             ],
           ),

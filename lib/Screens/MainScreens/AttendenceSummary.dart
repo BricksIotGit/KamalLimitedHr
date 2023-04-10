@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:xml/xml.dart' as xml;
@@ -17,13 +16,11 @@ class AttendanceSummary extends StatefulWidget {
   _AttendanceSummaryState createState() => _AttendanceSummaryState();
 }
 
-
 enum SingingCharacter { lafayette, jefferson }
 
 class _AttendanceSummaryState extends State<AttendanceSummary> {
-  bool fetchOrNot=false;
+  bool fetchOrNot = false;
   List<Map<String, String>> attendanceSummaryList = [];
-
 
   @override
   void initState() {
@@ -33,7 +30,7 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
   }
 
   hitApi() async {
-    fetchOrNot=true;
+    fetchOrNot = true;
     String username = 'xxhrms';
     String password = 'xxhrms';
     String basicAuth =
@@ -41,7 +38,8 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
     print(basicAuth);
 
     // 70500195 188700001 70500145 70500274
-    var requestBody = '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_ATTENDANCE">
+    var requestBody =
+        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_ATTENDANCE">
    <soapenv:Header/>
    <soapenv:Body>
       <get:GET_EMP_ATTENDANCEInput>
@@ -75,13 +73,16 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
 
     final elements = document.findAllElements('ROW');
 
-
     elements.forEach((node) {
       Map<String, String> map = {
         'EMP_ID': node.findElements('EMP_ID').single.text,
         'ATTND_DATE': node.findElements('ATTND_DATE').single.text,
-        'TIME_IN': ( node.findElements('TIME_IN').isNotEmpty)?node.findElements('TIME_IN').single.text:"null",
-        'TIME_OUT': (node.findElements('TIME_OUT').isNotEmpty)?node.findElements('TIME_OUT').single.text:"null",
+        'TIME_IN': (node.findElements('TIME_IN').isNotEmpty)
+            ? node.findElements('TIME_IN').single.text
+            : "null",
+        'TIME_OUT': (node.findElements('TIME_OUT').isNotEmpty)
+            ? node.findElements('TIME_OUT').single.text
+            : "null",
         'DUTY': node.findElements('DUTY').single.text,
         'STATUS': node.findElements('STATUS').single.text,
       };
@@ -89,28 +90,21 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
       setState(() {
         fetchOrNot = false;
       });
-
     });
 
-
-
-   print("");
-  print("list of deptStatusList: $attendanceSummaryList");
-
-
-
+    print("");
+    print("list of deptStatusList: $attendanceSummaryList");
   }
-
 
   @override
   Widget build(BuildContext context) {
     SingingCharacter? _character = SingingCharacter.jefferson;
 
     return WillPopScope(
-      onWillPop: () async  {
+      onWillPop: () async {
         print('The user tries to pop()');
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => const Home()));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => const Home()));
         return false;
       },
       child: Scaffold(
@@ -150,7 +144,7 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                 ),
                 SizedBox(
                   width: SizeConfig.widthMultiplier * 90,
-                  height: SizeConfig.heightMultiplier * 100,
+                  height: SizeConfig.heightMultiplier * 95,
                   child: Column(children: <Widget>[
                     Container(
                       margin: EdgeInsets.all(10),
@@ -293,68 +287,73 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                         ],
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                        child:
-                            Text("Select Date", style: TextStyle(fontSize: 16)),
-                      ),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        'Weekly',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      leading: Radio<SingingCharacter>(
-                        value: SingingCharacter.lafayette,
-                        groupValue: _character,
-                        onChanged: (SingingCharacter? value) {
-                          setState(() {
-                            _character = value;
-                          });
-                        },
-                      ),
-                    ),
-                    ListTile(
-                      title: const Text(
-                        'Monthly',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      leading: Radio<SingingCharacter>(
-                        value: SingingCharacter.jefferson,
-                        groupValue: _character,
-                        onChanged: (SingingCharacter? value) {
-                          setState(() {
-                            _character = value;
-                          });
-                        },
-                      ),
-                    ),
+                    // Align(
+                    //   alignment: Alignment.centerLeft,
+                    //   child: Padding(
+                    //     padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
+                    //     child:
+                    //         Text("Select Date", style: TextStyle(fontSize: 16)),
+                    //   ),
+                    // ),
+                    // ListTile(
+                    //   title: const Text(
+                    //     'Weekly',
+                    //     style: TextStyle(fontSize: 14),
+                    //   ),
+                    //   leading: Radio<SingingCharacter>(
+                    //     value: SingingCharacter.lafayette,
+                    //     groupValue: _character,
+                    //     onChanged: (SingingCharacter? value) {
+                    //       setState(() {
+                    //         _character = value;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
+                    // ListTile(
+                    //   title: const Text(
+                    //     'Monthly',
+                    //     style: TextStyle(fontSize: 14),
+                    //   ),
+                    //   leading: Radio<SingingCharacter>(
+                    //     value: SingingCharacter.jefferson,
+                    //     groupValue: _character,
+                    //     onChanged: (SingingCharacter? value) {
+                    //       setState(() {
+                    //         _character = value;
+                    //       });
+                    //     },
+                    //   ),
+                    // ),
 
-                    Container(
-                      // margin: const EdgeInsets.all(15.0),
-                      // padding: const EdgeInsets.all(3.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(topRight:Radius.circular(10.0),topLeft: Radius.circular(10.0)),
-                        color: Colors.black87,
-                        border: Border.all(
-                          color: Colors.black26,
-                          //                   <--- border color
-                          width: 1.0,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      child: Container(
+                        // margin: const EdgeInsets.all(15.0),
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(10.0),
+                              topLeft: Radius.circular(10.0)),
+                          color: Colors.black87,
+                          border: Border.all(
+                            color: Colors.black26,
+                            //                   <--- border color
+                            width: 1.0,
+                          ),
                         ),
+                        // color: Colors.black87,
+                        child: SizedBox(
+                            width: SizeConfig.widthMultiplier * 90,
+                            child: Align(
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Text("Previous 30 days",
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.white)),
+                                ))),
                       ),
-                      // color: Colors.black87,
-                      child: SizedBox(
-                          width: SizeConfig.widthMultiplier * 90,
-                          child: Align(
-                              alignment: Alignment.center,
-                              child: Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Text("Current Week",
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.white)),
-                              ))),
                     ),
                     Container(
                       //  margin: const EdgeInsets.all(15.0),
@@ -380,40 +379,45 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
-                                      child: Center(
-                                        child: Text("Date",
-                                            style: TextStyle(
-                                                fontSize: 13, color: Colors.black54)),
-                                      ),
-                                   flex:1 ),
+                                        child: Center(
+                                          child: Text("Date",
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54)),
+                                        ),
+                                        flex: 1),
                                     Expanded(
-                                      child: Center(
-                                        child: Text("In",
-                                            style: TextStyle(
-                                                fontSize: 13, color: Colors.black54)),
-                                      ),
-                                        flex:1),
+                                        child: Center(
+                                          child: Text("In",
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54)),
+                                        ),
+                                        flex: 1),
                                     Expanded(
-                                      child: Center(
-                                        child: Text("Out",
-                                            style: TextStyle(
-                                                fontSize: 13, color: Colors.black54)),
-                                      ),
-                                        flex:1),
+                                        child: Center(
+                                          child: Text("Out",
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54)),
+                                        ),
+                                        flex: 1),
                                     Expanded(
-                                      child: Center(
-                                        child: Text("Duty Time",
-                                            style: TextStyle(
-                                                fontSize: 13, color: Colors.black54)),
-                                      ),
-                                        flex:1  ),
+                                        child: Center(
+                                          child: Text("Duty Time",
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54)),
+                                        ),
+                                        flex: 1),
                                     Expanded(
-                                      child: Center(
-                                        child: Text("Status",
-                                            style: TextStyle(
-                                                fontSize: 13, color: Colors.black54)),
-                                      ),
-                                        flex:1  ),
+                                        child: Center(
+                                          child: Text("Status",
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54)),
+                                        ),
+                                        flex: 1),
                                     // Text("Query",
                                     //     style: TextStyle(
                                     //         fontSize: 13, color: Colors.black54))
@@ -421,15 +425,25 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                 ),
                               ))),
                     ),
-                     Padding(padding: EdgeInsets.all(0),child:fetchOrNot?Padding(
-                       padding: const EdgeInsets.all(8.0),
-                       child: CircularProgressIndicator(color: Colors.grey,),
-                     ):SizedBox() ,),
-                    Expanded(
+                    Padding(
+                      padding: EdgeInsets.all(0),
+                      child: fetchOrNot
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.grey,
+                              ),
+                            )
+                          : SizedBox(),
+                    ),
+                    SizedBox(
+                      height: 50 * SizeConfig.heightMultiplier,
                       child: Container(
-                        margin: const EdgeInsets.fromLTRB(0, 0, 0, 30),
+                        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
                         decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(bottomRight:Radius.circular(10.0),bottomLeft: Radius.circular(10.0)),
+                          borderRadius: const BorderRadius.only(
+                              bottomRight: Radius.circular(10.0),
+                              bottomLeft: Radius.circular(10.0)),
                           color: Colors.white,
                           border: Border.all(
                             color: Colors.black26,
@@ -441,7 +455,7 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                           itemCount: attendanceSummaryList.length,
                           itemBuilder: (context, index) {
                             return SizedBox(
-                            //width: SizeConfig.widthMultiplier * 40,
+                              //width: SizeConfig.widthMultiplier * 40,
                               child: Container(
                                 // color: Colors.cyanAccent,
                                 // decoration: BoxDecoration(
@@ -459,29 +473,8 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                           Expanded(
                                               child: Center(
                                                 child: Text(
-                                                  attendanceSummaryList[index]['ATTND_DATE']!,
-                                                  style: TextStyle(
-                                                     // fontWeight: FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Clrs.dark_Grey),
-                                                ),
-                                              ),
-                                              flex: 1),
-                                          Expanded(
-                                              child: Center(
-                                                child: Text(
-                                                  attendanceSummaryList[index]['TIME_IN']!,
-                                                  style: TextStyle(
-                                                     // fontWeight: FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Clrs.dark_Grey),
-                                                ),
-                                              ),
-                                              flex: 1),
-                                          Expanded(
-                                              child: Center(
-                                                child: Text(
-                                                  attendanceSummaryList[index]['TIME_OUT']!,
+                                                  attendanceSummaryList[index]
+                                                      ['ATTND_DATE']!,
                                                   style: TextStyle(
                                                       // fontWeight: FontWeight.bold,
                                                       fontSize: 12,
@@ -492,9 +485,10 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                           Expanded(
                                               child: Center(
                                                 child: Text(
-                                                  attendanceSummaryList[index]['DUTY']!,
+                                                  attendanceSummaryList[index]
+                                                      ['TIME_IN']!,
                                                   style: TextStyle(
-                                                     // fontWeight: FontWeight.bold,
+                                                      // fontWeight: FontWeight.bold,
                                                       fontSize: 12,
                                                       color: Clrs.dark_Grey),
                                                 ),
@@ -503,9 +497,34 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                           Expanded(
                                               child: Center(
                                                 child: Text(
-                                                  attendanceSummaryList[index]['STATUS']!,
+                                                  attendanceSummaryList[index]
+                                                      ['TIME_OUT']!,
                                                   style: TextStyle(
-                                                    //  fontWeight: FontWeight.bold,
+                                                      // fontWeight: FontWeight.bold,
+                                                      fontSize: 12,
+                                                      color: Clrs.dark_Grey),
+                                                ),
+                                              ),
+                                              flex: 1),
+                                          Expanded(
+                                              child: Center(
+                                                child: Text(
+                                                  attendanceSummaryList[index]
+                                                      ['DUTY']!,
+                                                  style: TextStyle(
+                                                      // fontWeight: FontWeight.bold,
+                                                      fontSize: 12,
+                                                      color: Clrs.dark_Grey),
+                                                ),
+                                              ),
+                                              flex: 1),
+                                          Expanded(
+                                              child: Center(
+                                                child: Text(
+                                                  attendanceSummaryList[index]
+                                                      ['STATUS']!,
+                                                  style: TextStyle(
+                                                      //  fontWeight: FontWeight.bold,
                                                       fontSize: 12,
                                                       color: Clrs.dark_Grey),
                                                 ),
@@ -544,22 +563,6 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                         ),
                       ),
                     ),
-
-                    // Table(
-                    //   defaultColumnWidth: FixedColumnWidth(30.0),
-                    //
-                    //   children: [
-                    //
-                    //     TableRow(children: [
-                    //       Column(children: [Text('4')]),
-                    //       Column(children: [Text('4')]),
-                    //       Column(children: [Text('5')]),
-                    //       Column(children: [Text('5')]),
-                    //       Column(children: [Text('5')]),
-                    //       Column(children: [Text('5')]),
-                    //     ]),
-                    //   ],
-                    // ),
                   ]),
                 )
               ],

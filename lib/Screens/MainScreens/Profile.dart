@@ -90,13 +90,15 @@ class _ProfileState extends State<Profile> {
     print(basicAuth);
 
     // 70500195 188700001 70500145 70500274
-    var requestBody = '''<?xml version="1.0" encoding="utf-8"?>
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DIRECTORY">
+    var requestBody = '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DIRECTORY">
    <soapenv:Header/>
    <soapenv:Body>
       <get:GET_EMP_DIRECTORYInput>
          <get:P_OUTPUT-XMLTYPE-OUT/>
-         <get:P_EMP_ID-NUMBER-IN>$empIDSp</get:P_EMP_ID-NUMBER-IN>
+         <get:P_ENAME-VARCHAR2-IN>null</get:P_ENAME-VARCHAR2-IN>
+         <get:P_EMP_ID-VARCHAR2-IN>$empIDSp</get:P_EMP_ID-VARCHAR2-IN>
+         <get:P_EMP_DESIGNATION-VARCHAR2-IN>null</get:P_EMP_DESIGNATION-VARCHAR2-IN>
+         <get:P_EMP_DEPARTMENT-VARCHAR2-IN>null</get:P_EMP_DEPARTMENT-VARCHAR2-IN>
       </get:GET_EMP_DIRECTORYInput>
    </soapenv:Body>
 </soapenv:Envelope>''';

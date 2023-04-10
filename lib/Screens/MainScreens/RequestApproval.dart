@@ -3,11 +3,14 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart' as xml;
 
 import '../../styling/colors.dart';
 import '../../styling/images.dart';
 import '../../styling/size_config.dart';
+import '../../utils/Toast.dart';
 import 'Home.dart';
 
 class RequestApproval extends StatefulWidget {
@@ -40,7 +43,8 @@ class _RequestApprovalState extends State<RequestApproval> {
     String basicAuth =
         'Basic ' + base64.encode(utf8.encode('$username:$password'));
     print(basicAuth);
-
+    final prefs = await SharedPreferences.getInstance();
+    final String? empIDSp = prefs.getString('empID');
     // 70500195 188700001 70500145 70500274
     var requestBody = '''<?xml version="1.0" encoding="utf-8"?>
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_PEND_LV_APPROVAL">
@@ -48,7 +52,7 @@ class _RequestApprovalState extends State<RequestApproval> {
    <soapenv:Body>
       <get:GET_EMP_PEND_LV_APPROVALInput>
          <get:P_OUTPUT-XMLTYPE-OUT/>
-         <get:P_EMP_ID-VARCHAR2-IN>11700001</get:P_EMP_ID-VARCHAR2-IN>
+         <get:P_EMP_ID-VARCHAR2-IN>$empIDSp</get:P_EMP_ID-VARCHAR2-IN>
       </get:GET_EMP_PEND_LV_APPROVALInput>
    </soapenv:Body>
 </soapenv:Envelope>''';
@@ -76,19 +80,24 @@ class _RequestApprovalState extends State<RequestApproval> {
 
     var document = xml.XmlDocument.parse(xmlSP);
     var rows = document.findAllElements('ROW');
+    print(
+        "Response document length: ${document.findAllElements('ROW').length}");
 
+    if(document.findAllElements('ROW').isEmpty){
+      toast("No data available! ");
+    }
     for (var row in rows) {
       var empId = row.findElements('EMP_ID').single.text;
       var leaveTitle = row.findElements('LEAVE_TITLE').single.text;
       var leaveFrom = row.findElements('LEAVE_FROM').single.text;
       var leaveTo = row.findElements('LEAVE_TO').single.text;
-      var nOfDays = row.findElements('N_OF_DAYS').single.text;
+      var nOfDays = row.findElements('NO_OF_DAYS').single.text;
       var approvalEmpId = row.findElements('APPROVAL_EMP_ID').single.text;
       final empName = (row.findElements('ENAME').isNotEmpty)
           ? row.findElements('ENAME').single.text
           : "Empty";
-      final empDes = (row.findElements('empDes').isNotEmpty)
-          ? row.findElements('empDes').single.text
+      final empDes = (row.findElements('EMP_DESIGNATION').isNotEmpty)
+          ? row.findElements('EMP_DESIGNATION').single.text
           : "Empty";
 
       print("");
@@ -269,7 +278,8 @@ class _RequestApprovalState extends State<RequestApproval> {
                                               flex: 1),
                                           Flexible(
                                               child: Text(
-                                                "empty",
+                                                leaveRequestList[index]
+                                                ['empDes']!,
                                                 style: TextStyle(
                                                    // fontWeight: FontWeight.bold,
                                                     fontSize: 12,
@@ -304,7 +314,7 @@ class _RequestApprovalState extends State<RequestApproval> {
                                                         leaveRequestList[index]
                                                             ['approvalEmpId']!;
 
-                                                    infoAlertCustom();
+                                                    infoAlertCustom(index);
                                                   },
                                                   child: Text('Action',
                                                       style: TextStyle(
@@ -421,7 +431,7 @@ class _RequestApprovalState extends State<RequestApproval> {
     );
   }
 
-  void infoAlertCustom() {
+  void infoAlertCustom(int index) {
     Dialog errorDialog = Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
@@ -434,7 +444,7 @@ class _RequestApprovalState extends State<RequestApproval> {
               GestureDetector(
                 onTap: () {
                   Navigator.of(context).pop();
-                }, //here
+                },
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Icon(
@@ -448,6 +458,7 @@ class _RequestApprovalState extends State<RequestApproval> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+
                   Padding(
                     padding: EdgeInsets.all(10.0),
                     child: Text.rich(
@@ -509,7 +520,7 @@ class _RequestApprovalState extends State<RequestApproval> {
               Padding(padding: EdgeInsets.only(top: 50.0)),
               ElevatedButton(
                 onPressed: () {
-                  // postHitApi();
+                  postHitApi(index);
                 },
                 child: const Text('Post',
                     style: TextStyle(
@@ -530,74 +541,174 @@ class _RequestApprovalState extends State<RequestApproval> {
         context: context, builder: (BuildContext context) => errorDialog);
   }
 
-//   Future<void> postHitApi(
-//       String postSessionID,
-//       String empIDSp,
-//       String dateToInput,
-//       String dateFromInput,
-//       String daysInNumCont,
-//       String postLeaveID) async {
-//     // print("step in submit hit api");
-//     String username = 'xxhrms';
-//     String password = 'xxhrms';
-//     String basicAuth =
-//         'Basic ' + base64.encode(utf8.encode('$username:$password'));
-//     print(basicAuth);
-//
-//     // 70500195 188700001 70500145 70500274
-//
-//     var requestBody =
-//     '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sub="http://xmlns.oracle.com/orawsv/XXHRMS/SUBMIT_EMP_LEAVES">
-//    <soapenv:Header/>
-//    <soapenv:Body>
-//       <sub:SUBMIT_EMP_LEAVESInput>
-//          <sub:P_TO_DATE-DATE-IN>$dateToInput</sub:P_TO_DATE-DATE-IN>
-//          <sub:P_SESSION_ID-NUMBER-IN>$postSessionID</sub:P_SESSION_ID-NUMBER-IN>
-//          <sub:P_OUTPUT-VARCHAR2-OUT/>
-//          <sub:P_L_DAY-NUMBER-IN>$daysInNumCont</sub:P_L_DAY-NUMBER-IN>
-//          <sub:P_LV_ID-NUMBER-IN>$postLeaveID</sub:P_LV_ID-NUMBER-IN>
-//          <sub:P_FM_DATE-DATE-IN>$dateFromInput</sub:P_FM_DATE-DATE-IN>
-//          <sub:P_EMP_ID-VARCHAR2-IN>$empIDSp</sub:P_EMP_ID-VARCHAR2-IN>
-//          <sub:P_CPL_DATE-DATE-IN></sub:P_CPL_DATE-DATE-IN>
-//       </sub:SUBMIT_EMP_LEAVESInput>
-//    </soapenv:Body>
-// </soapenv:Envelope>''';
-//
-//     var response = await post(
-//       Uri.parse(
-//           'http://XXHRMS:XXHRMS@202.125.141.170:8080/orawsv/XXHRMS/SUBMIT_EMP_LEAVES'),
-//       headers: {
-//         'content-type': 'text/xml; charset=utf-8',
-//         'authorization': basicAuth
-//       },
-//       body: utf8.encode(requestBody),
-//     );
-//
-//     print("Response status: ${response.statusCode}");
-//     print("Response body submit: ${response.body}");
-//
-//     var xmlString = response.body;
-//
-//     if (response.statusCode == 200) {
-//       //toast("Submited successfuly!");
-//       // setState(() {});
-//       // Output: OK
-//       final document = xml.XmlDocument.parse(xmlString);
-//       final outputElement = document
-//           .getElement('soap:Envelope')
-//           ?.getElement('soap:Body')
-//           ?.getElement('SUBMIT_EMP_LEAVESOutput')
-//           ?.getElement('P_OUTPUT');
-//
-//       final outputValue = outputElement?.text;
-//       print(outputValue);
-//
-//       if (outputValue == "OK") {
-//         toast("Submited successfuly!");
-//       } // prints "OK"
-//       else
-//         toast("Submited fail!");
-//     }
-//   }
+  Future<void> postHitApi(
+      int index
+      ) async {
+    //here
+
+    // 'empId': empId,
+    // 'leaveTitle': leaveTitle,
+    // 'leaveFrom': leaveFrom,
+    // 'leaveTo': leaveTo,
+    // 'nOfDays': nOfDays,
+    // 'approvalEmpId': approvalEmpId,
+    // 'empDes': empDes,
+    // 'empName': empName,
+     print("step in post hit api: ${leaveRequestList[index]['leaveTitle']}");
+
+     var leaveID="";
+     var sessionID="";
+     if(leaveRequestList[index]['leaveTitle']=="SICK LEAVE"){
+
+       sessionID="0";
+       leaveID="12";
+     }
+     else if(leaveRequestList[index]['leaveTitle']=="CPL LEAVE"){
+       sessionID="0";
+       leaveID="14";
+     }
+     else if(leaveRequestList[index]['leaveTitle']=="ANUAL LEAVE"){
+       sessionID="4";
+       leaveID="13";
+     }
+     else if(leaveRequestList[index]['leaveTitle']=="CASUAL LEAVE"){
+       sessionID="0";
+       leaveID="11";
+     }
+
+
+    String username = 'xxhrms';
+    String password = 'xxhrms';
+    String basicAuth =
+        'Basic ' + base64.encode(utf8.encode('$username:$password'));
+    print(basicAuth);
+
+    // 70500195 188700001 70500145 70500274
+
+    var requestBody =
+    '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:post="http://xmlns.oracle.com/orawsv/XXHRMS/POST_EMP_LEAVES">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <post:POST_EMP_LEAVESInput>
+         <post:P_TO_DATE-DATE-IN>${leaveRequestList[index]['leaveTo']!}</post:P_TO_DATE-DATE-IN>
+         <post:P_SESSION_ID-NUMBER-IN>$sessionID</post:P_SESSION_ID-NUMBER-IN>
+         <post:P_OUTPUT-VARCHAR2-OUT/>
+         <post:P_L_DAY-NUMBER-IN>${leaveRequestList[index]['nOfDays']!}</post:P_L_DAY-NUMBER-IN>
+         <post:P_LV_ID-NUMBER-IN>$leaveID</post:P_LV_ID-NUMBER-IN>
+         <post:P_FM_DATE-DATE-IN>${leaveRequestList[index]['leaveFrom']!}</post:P_FM_DATE-DATE-IN>
+         <post:P_EMP_ID-VARCHAR2-IN>${leaveRequestList[index]['empId']!}</post:P_EMP_ID-VARCHAR2-IN>
+         <post:P_CPL_DATE-DATE-IN></post:P_CPL_DATE-DATE-IN>
+      </post:POST_EMP_LEAVESInput>
+   </soapenv:Body>
+</soapenv:Envelope>''';
+
+    var response = await post(
+      Uri.parse(
+          'http://XXHRMS:XXHRMS@202.125.141.170:8080/orawsv/XXHRMS/POST_EMP_LEAVES'),
+      headers: {
+        'content-type': 'text/xml; charset=utf-8',
+        'authorization': basicAuth
+      },
+      body: utf8.encode(requestBody),
+    );
+
+    print("Response status: ${response.statusCode}");
+    print("Response body submit: ${response.body}");
+
+    var xmlString = response.body;
+
+    if (response.statusCode == 200) {
+
+      final document = xml.XmlDocument.parse(xmlString);
+      final outputElement = document
+          .getElement('soap:Envelope')
+          ?.getElement('soap:Body')
+          ?.getElement('POST_EMP_LEAVESOutput')
+          ?.getElement('P_OUTPUT');
+
+      final outputValue = outputElement?.text;
+      print(outputValue);
+
+      if (outputValue == "OK") {
+        submitAlertCustom();
+        // toast("Post successfully!");
+      } // prints "OK"
+      else {
+        errorCustom(outputValue!);
+        // toast("Post fail!");
+      }
+    }
+  }
+  void submitAlertCustom() {
+    Dialog doneDialog = Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      //this right here
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_8XY7J1RJeZ.json")
+            ),
+
+            Padding(padding: EdgeInsets.only(top: 5.0)),
+            TextButton(
+                onPressed: () {
+                  //  Navigator.of(context).pop();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: Text(
+                  'Close!',
+                  style: TextStyle(color: Colors.red, fontSize: 16.0),
+                ))
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => doneDialog);
+  }
+  void errorCustom(String msg) {
+    Dialog errorDialog = Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      //this right here
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 200,
+              width: 200,
+              child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_O6BZqckTma.json")
+              ),
+            ),
+
+            Padding(padding: EdgeInsets.only(top: 5.0)),
+            Text("Reason: $msg"),
+            TextButton(
+                onPressed: () {
+                  //  Navigator.of(context).pop();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: Text(
+                  'Close!',
+                  style: TextStyle(color: Colors.red, fontSize: 16.0),
+                ))
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => errorDialog);
+  }
 
 }
