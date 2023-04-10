@@ -18,6 +18,7 @@ import '../../styling/size_config.dart';
 import '../Starting/Login.dart';
 import 'VisitorRequest.dart';
 
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -135,52 +136,7 @@ class _HomeState extends State<Home> {
                   )
                 ],
               ),
-              // Padding(
-              //   padding: const EdgeInsets.fromLTRB(30, 15, 30, 15),
-              //   child: DropdownButtonFormField(
-              //     decoration: InputDecoration(
-              //       contentPadding:
-              //           EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 5),
-              //       //this one
-              //
-              //       focusedBorder: OutlineInputBorder(
-              //         borderSide: BorderSide(color: Clrs.light_Grey, width: 1),
-              //         borderRadius: BorderRadius.circular(10),
-              //       ),
-              //       enabledBorder: OutlineInputBorder(
-              //         borderSide: BorderSide(color: Clrs.light_Grey, width: 1),
-              //         borderRadius: BorderRadius.circular(10),
-              //       ),
-              //       border: OutlineInputBorder(
-              //         borderSide: BorderSide(color: Clrs.light_Grey, width: 1),
-              //         borderRadius: BorderRadius.circular(10),
-              //       ),
-              //       filled: true,
-              //       fillColor: Clrs.medium_Grey,
-              //     ),
-              //     dropdownColor: Clrs.light_Grey,
-              //     // Initial Value
-              //     value: dropdownvalue,
-              //
-              //     // Down Arrow Ico
-              //     icon: const Icon(Icons.keyboard_arrow_down),
-              //
-              //     // Array list of items
-              //     items: items.map((String items) {
-              //       return DropdownMenuItem(
-              //         value: items,
-              //         child: Text(items),
-              //       );
-              //     }).toList(),
-              //     // After selecting the desired option,it will
-              //     // change button value to selected value
-              //     onChanged: (String? newValue) {
-              //       setState(() {
-              //         dropdownvalue = newValue!;
-              //       });
-              //     },
-              //   ),
-              // ),
+
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
                 child: SizedBox(
@@ -217,7 +173,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Employee Directory')
@@ -230,7 +186,8 @@ class _HomeState extends State<Home> {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => LeaveRequest()));
+
+                             builder: (context) => LeaveRequest()));
                           },
                           child: Container(
                             padding: const EdgeInsets.all(8),
@@ -250,7 +207,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Leave Requests')
@@ -283,7 +240,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Request Approvals')
@@ -316,7 +273,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Attendence Summary')
@@ -349,7 +306,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Department Status')
@@ -382,7 +339,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Outdoor Duty Request')
@@ -415,7 +372,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Visitor Request')
@@ -449,7 +406,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 const Text(
@@ -485,7 +442,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Announcements')
@@ -520,7 +477,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Profile')
@@ -556,7 +513,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Settings')
@@ -588,7 +545,7 @@ class _HomeState extends State<Home> {
                                 Image(
                                   //   height:50* SizeConfig.heightMultiplier,
                                   width: 30 * SizeConfig.widthMultiplier,
-                                  height: 30 * SizeConfig.widthMultiplier,
+                                  height: 27 * SizeConfig.widthMultiplier,
                                   image: AssetImage(Images.employ_ic),
                                 ),
                                 Text('Sign Out')

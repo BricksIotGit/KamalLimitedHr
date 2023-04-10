@@ -25,6 +25,7 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
   TextEditingController subjectControl = TextEditingController();
   TextEditingController bodyControl = TextEditingController();
   var empID = "";
+  var empNm = "";
 
   @override
   void initState() {
@@ -71,7 +72,7 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                         width: 100 * SizeConfig.widthMultiplier,
                         child: Center(
                             child: Text(
-                          "Complain And Suggestions",
+                          "Complaints And Suggestions",
                           style: TextStyle(color: Clrs.white, fontSize: 20),
                         )))
                   ],
@@ -91,7 +92,7 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                       Text("Type:"),
                       Row(
                         children: [
-                          Text("Complain"),
+                          const Text("Complaint"),
                           Checkbox(
                             checkColor: Colors.white,
                             activeColor: Colors.grey,
@@ -128,7 +129,13 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                   padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
                   child: Align(
                       alignment: Alignment.bottomLeft,
-                      child: Text("Host ID: $empID")),
+                      child: Text("Employee ID: $empID")),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, 5, 20, 10),
+                  child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text("Employee Name: $empNm")),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
@@ -157,12 +164,15 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: TextFormField(
+
                     controller: bodyControl,
                     cursorColor: Colors.black,
                     style: const TextStyle(color: Colors.black),
                     decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.fromLTRB(10, 40, 10, 40),
+
                         isDense: true,
                         focusedBorder: OutlineInputBorder(
                           borderSide:
@@ -181,7 +191,7 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                         ),
                         labelText: 'Body',
                         labelStyle: TextStyle(color: Colors.black)),
-                    maxLines: 5,
+                    maxLines: 15,
                     minLines: 3,
                   ),
                 ),
@@ -292,7 +302,9 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
   Future<void> setId() async {
     final prefs = await SharedPreferences.getInstance();
     final String? empIDSp = prefs.getString('empID');
+    final String? empName = prefs.getString('empName');
     empID = empIDSp!;
+    empNm = empName!;
     setState(() {});
   }
 }

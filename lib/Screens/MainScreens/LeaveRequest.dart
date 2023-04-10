@@ -1,11 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:kamal_limited/utils/Toast.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -78,14 +77,14 @@ class _LeaveRequestState extends State<LeaveRequest> {
         'Basic ' + base64.encode(utf8.encode('$username:$password'));
     print(basicAuth);
 
-    // 70500195 188700001 70500145 70500274 //
+    // 70500195 188700001 70500145 70500274 // $empIDSp 50500006
     var requestBody =
         '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_LEAVES">
    <soapenv:Header/>
    <soapenv:Body>
       <get:GET_EMP_LEAVESInput>
          <get:P_OUTPUT-XMLTYPE-OUT/>
-         <get:P_EMP_ID-VARCHAR2-IN>50500006</get:P_EMP_ID-VARCHAR2-IN>
+         <get:P_EMP_ID-VARCHAR2-IN>$empIDSp</get:P_EMP_ID-VARCHAR2-IN>
       </get:GET_EMP_LEAVESInput>
    </soapenv:Body>
 </soapenv:Envelope>''';
@@ -143,7 +142,6 @@ class _LeaveRequestState extends State<LeaveRequest> {
       });
 
       //  print("Response employees leave loop: ${employeesLeave[0]["LV_TYPE"]}");
-
     }
 // Iterate over the ROW elements and extract the data
 
@@ -195,7 +193,6 @@ class _LeaveRequestState extends State<LeaveRequest> {
             print(
                 "annual dual if:  , $dualBal , $dualDue , $dualFa , $dualHa ");
             // checkAnnualSession("3");
-
           }
         }
         print("annual leave $annualDue $annualFA $annualHA $annualBal");
@@ -244,7 +241,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
 
   double? _calculateDifference() {
     if (_firstDate != null && _secondDate != null) {
-      var a = _secondDate?.difference(_firstDate!).inDays.toDouble();
+      double? a = _secondDate?.difference(_firstDate!).inDays.toDouble();
 
       print("cal 1: $a");
       if (a == 0 &&
@@ -255,8 +252,16 @@ class _LeaveRequestState extends State<LeaveRequest> {
         return a;
       } else if (a == 0) {
         a = 1.0;
+        print("cal 3: $a");
+
         return a;
       } else {
+        print("cal 4: $a");
+
+        a=1.0 + a!;
+        print("cal 4: $a");
+
+        // a=(a + 1.0);
         return a;
       }
     }
@@ -581,7 +586,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               } else if (index == 1) {
                                 valueAnnualCheck = value;
 
-                                setState(() {
+
                                   valueHalfSickCheck = false;
                                   valueHalfCasualCheck = false;
                                   valueCPLCheck = false;
@@ -589,11 +594,11 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                   valueSickCheck = false;
                                   valueCasualCheck = false;
                                   difference = _calculateDifference()!;
-                                });
+                                setState(() {  });
                               } else if (index == 2) {
                                 valueHalfSickCheck = value;
 
-                                setState(() {
+
                                   valueSickCheck = false;
                                   valueHalfCasualCheck = false;
                                   valueCPLCheck = false;
@@ -601,7 +606,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                   valueAnnualCheck = false;
                                   valueCasualCheck = false;
                                   difference = _calculateDifference()!;
-                                });
+                                setState(() {  });
                               } else if (index == 3) {
                                 valueCasualCheck = value;
                                 valueHalfSickCheck = false;
@@ -650,8 +655,10 @@ class _LeaveRequestState extends State<LeaveRequest> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(30, 15, 30, 0),
                   child: Container(
-                    height: MediaQuery.of(context).size.width / 8,
+                    height: MediaQuery.of(context).size.width / 5,
                     child: TextField(
+                      maxLines: 5,
+                      minLines: 3,
                       controller: textReason,
                       //keyboardType: TextInputType.number,
                       cursorColor: Colors.grey,
@@ -706,10 +713,10 @@ class _LeaveRequestState extends State<LeaveRequest> {
                             // ),
                             icon: Icon(Icons.calendar_today),
                             //icon of text field
-                            labelText: "Enter from Date" //label text of field
+                            labelText: "Enter from Date"
+                            //label text of field
                             ,
-                            labelStyle: TextStyle(color: Colors.grey)
-                        ),
+                            labelStyle: TextStyle(color: Colors.grey)),
 
                         readOnly: true,
                         //set it true, so that user will not able to edit text
@@ -768,8 +775,9 @@ class _LeaveRequestState extends State<LeaveRequest> {
                             // ),
                             icon: Icon(Icons.calendar_today),
                             //icon of text field
-                            labelText: "Enter to Date" ,
-                            labelStyle: TextStyle(color: Colors.grey)//label text of field
+                            labelText: "Enter to Date",
+                            labelStyle: TextStyle(
+                                color: Colors.grey) //label text of field
                             ),
                         readOnly: true,
                         //set it true, so that user will not able to edit text
@@ -894,7 +902,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               checkLeaves = true;
                             } else {
                               checkLeaves = false;
-                              toast("Cannot submit selected Leave type!");
+                             // toast("Cannot submit selected Leave type!");
 
                               print("sick leave can't post");
                             }
@@ -910,7 +918,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               checkLeaves = true;
                             } else {
                               checkLeaves = false;
-                              toast("Cannot submit selected Leave type!");
+                              //toast("Cannot submit selected Leave type!");
 
                               print("anual leave can't post");
                             }
@@ -926,7 +934,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               checkLeaves = true;
                             } else {
                               checkLeaves = false;
-                              toast("Cannot submit selected Leave type!");
+                              //toast("Cannot submit selected Leave type!");
 
                               print("casual leave can't post");
                             }
@@ -942,7 +950,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               checkLeaves = true;
                             } else {
                               checkLeaves = false;
-                              toast("Cannot submit selected Leave type!");
+                            //  toast("Cannot submit selected Leave type!");
 
                               print("cpl leave can't post");
                             }
@@ -955,25 +963,32 @@ class _LeaveRequestState extends State<LeaveRequest> {
                             print("empIDSp is null");
                           } else if (dateToInput.text == "") {
                             setState(() {
-                              _errorTextETD = 'Must required';
+                              _errorTextETD = 'Required';
                             });
                             print("dateToInput.text is null");
                           } else if (dateFromInput.text == "") {
                             print("dateFromInput.text is null");
                             setState(() {
-                              _errorTextEFD = 'Must required';
+                              _errorTextEFD = 'Required';
                             });
                           } else if (textReason.text == "") {
                             print("daysInNumCont.text is null");
                             setState(() {
-                              _errorTextReason = 'Must required';
+                              _errorTextReason = 'Required';
                             });
                           } else if (postLeaveID == null || postLeaveID == "") {
                             print("postLeaveID is null");
                           } else if (!checkLeaves) {
-                            toast("No due leave available!");
+                            errorCustom("Cannot submit selected type!");
+
+                           // toast("No due leave available!");
                             //toast("Cant submit request on this leave type!");
-                          } else {
+                          }
+                          else if(difference <=  0.0){
+                            errorCustom("Select correct dates!");
+
+                          }
+                          else {
                             setState(() {
                               _errorTextReason = null;
                               _errorTextEFD = null;
@@ -982,14 +997,15 @@ class _LeaveRequestState extends State<LeaveRequest> {
 
                             //toast("Submitted");
                             print(
-                                "postsesionID: ${postSessionID} empID: ${empIDSp} To Date: ${dateToInput.text} & From Date: ${dateFromInput.text} & Days in Num: ${difference} & Leave_ID: ${postLeaveID}");
+                                "postsesionID: ${postSessionID}  & Leave_ID: ${postLeaveID} & empID: ${empIDSp} To Date: ${dateToInput.text} & From Date: ${dateFromInput.text} & Days in Num: ${difference}");
+
 
                             submitApiHit(
                                 postSessionID!,
                                 empIDSp,
                                 dateToInput.text,
                                 dateFromInput.text,
-                               difference.toString(),
+                                difference.toString(),
                                 postLeaveID!);
                           }
                         },
@@ -1077,34 +1093,114 @@ class _LeaveRequestState extends State<LeaveRequest> {
       print(outputValue);
 
       if (outputValue == "OK") {
-        toast("Submited successfuly!");
+        submitAlertCustom();
+      //  toast("Submitted successfully!");
       } // prints "OK"
-      else
-        toast("Submited fail!");
+      else {
+        errorCustom("$outputValue");
+        toast("Submitted fail!");
+      }
     }
   }
 
   String? checkAnnualSession() {
     print("checkAnnualSession enter $annualBal $annualBal2");
-    print("checkAnnualSession session $annualSession $annualSession2");
-
+    print("checkAnnualSession session $annualSession $annualSession2"); //6 7 // 4 3
+//here
     if (annualBal == "0") {
       print("checkAnnualSession if $annualSession");
 
       setState(() {
-        annualSession = "3";
+        annualSession = annualSession2;
+        // annualSession = "3";
       });
       print("checkAnnualSession if $annualSession");
       return annualSession;
-    } else if (annualBal2 == "0") {
+    }
+    else if (annualBal2 == "0") {
       print("checkAnnualSession else $annualSession");
 
       setState(() {
-        annualSession = "4";
+        annualSession = annualSession;
+        // annualSession = "4";
       });
       print("checkAnnualSession else $annualSession");
 
       return annualSession;
+    }else {
+      return annualSession;
     }
   }
+  void submitAlertCustom() {
+    Dialog doneDialog = Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      //this right here
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_8XY7J1RJeZ.json")
+            ),
+
+            Padding(padding: EdgeInsets.only(top: 5.0)),
+            TextButton(
+                onPressed: () {
+                  //  Navigator.of(context).pop();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: Text(
+                  'Close!',
+                  style: TextStyle(color: Colors.red, fontSize: 16.0),
+                ))
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => doneDialog);
+  }
+  void errorCustom(String msg) {
+    Dialog errorDialog = Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      //this right here
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 200,
+              width: 200,
+              child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_O6BZqckTma.json")
+              ),
+            ),
+
+            Padding(padding: EdgeInsets.only(top: 5.0)),
+            Text("Reason: $msg"),
+            TextButton(
+                onPressed: () {
+                  //  Navigator.of(context).pop();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: Text(
+                  'Close!',
+                  style: TextStyle(color: Colors.red, fontSize: 16.0),
+                ))
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => errorDialog);
+  }
+
 }
