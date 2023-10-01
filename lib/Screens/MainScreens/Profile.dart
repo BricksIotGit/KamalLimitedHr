@@ -26,7 +26,8 @@ class _ProfileState extends State<Profile> {
   List<Map<String, String>> employeesProfile = [];
  bool fetchOrNot = false;
 
-  @override
+  // var image = base64Decode(profileUrl);
+@override
 
   initState() {
     // ignore: avoid_print
@@ -145,19 +146,24 @@ class _ProfileState extends State<Profile> {
       final empDesig = row.findElements('EMP_DESIGNATION').single.text;
       final doj = row.findElements('DOJ').single.text;
       final doc = (row.findElements('DOC').isNotEmpty)? row.findElements('DOC').single.text: "" ;
+      final empProf = (row.findElements('PROFILE_URL').isNotEmpty)? row.findElements('PROFILE_URL').single.text: "" ;
       final empType = row.findElements('EMP_TYPE').single.text;
       final empShift = row.findElements('EMP_SHIFT').single.text;
       final empSection = row.findElements('EMP_SECTION').single.text;
       final empEmail = row.findElements('EMAIL').single.text;
       final empMob = row.findElements('MOBILE').single.text;
-      final empProf = row.findElements('PROFILE_URL').single.text;
-      print("Response employees doj: ${doj}");
+      final empEdu = row.findElements('H_EDU').single.text;
+      final empExt = row.findElements('EXT_NO').single.text;
+      final empMarital = row.findElements('MARTIAL_STATUS').single.text;
+      final empSalary = row.findElements('SALARY').single.text;
+      print("Response employees empProf: ${empProf}");
 
 
       employeesProfile.add({
         'empId': empId,
         'ename': ename,
         'fname': fname,
+        'empMarital': empMarital,
         'gndr': gndr,
         'empDpt': empDpt,
         'empDesig': empDesig,
@@ -169,6 +175,9 @@ class _ProfileState extends State<Profile> {
         'empEmail': empEmail,
         'empMob': empMob,
         'empProf': empProf,
+        'empEdu': empEdu,
+        'empSalary': empSalary,
+        'empExt': empExt,
       });
 
 
@@ -193,7 +202,7 @@ class _ProfileState extends State<Profile> {
         },
         child: Scaffold(
         body: SafeArea(
-          child: Container(
+          child: SingleChildScrollView(
             child: Column(
               children: [
                 Stack(
@@ -227,6 +236,11 @@ class _ProfileState extends State<Profile> {
                   ],
                 ),
                  Image(image: AssetImage(Images.profile_ic)),
+                 // Image.network('https://drive.google.com/uc?export=view&id=1jRX6ExozGBot0HJATzye9kc77dr_Ae-z',), //https://drive.google.com/file/d/1jRX6ExozGBot0HJATzye9kc77dr_Ae-z/view?usp=sharing
+            // SizedBox(
+            //     height: 100,
+            //     width: 100,
+            //     child: Image.memory(imageNEWblob)),
                 // Padding(
                 //   padding: const EdgeInsets.all(20.0),
                 //   child: SizedBox(
@@ -254,332 +268,361 @@ class _ProfileState extends State<Profile> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                            text: 'Name:',
-                                            style: TextStyle(
+                            SizedBox(
+                              width: 40 * SizeConfig.widthMultiplier,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(
+                                              'Name',
+                                              style: TextStyle(
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text:' ${employeesProfile[0]["ename"]}',
-                                            style: TextStyle(
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["ename"]!,
+                                              style: TextStyle(
                                                 fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: SizedBox(
-                                    width: 200,
-                                    child: RichText(
-                                      text: TextSpan(
-                                        //  text: 'Hello ',
-                                        //style: DefaultTextStyle.of(context).,
-                                        children:   <TextSpan>[
-                                          TextSpan(
-                                              text: 'Department:',
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.grey)),
-                                          TextSpan(
-                                              text: ' ${employeesProfile[0]["empDpt"]}',
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.grey)),
-                                        ],
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children:   <TextSpan>[
-                                        TextSpan(
-                                            text: 'Designation:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: ' ${employeesProfile[0]["empDesig"]}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children: const <TextSpan>[
-                                        TextSpan(
-                                            text: 'Salary:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: ' 00000',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children:   <TextSpan>[
-                                        TextSpan(
-                                            text: 'Joining Date:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                          text: ' ${employeesProfile[0]["doj"]}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children:  <TextSpan>[
-                                        TextSpan(
-                                            text: 'Confirmation Date:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: ' ${employeesProfile[0]["doc"]}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: SizedBox(
-                                    width: 200,
-                                    child: RichText(
-                                      text: TextSpan(
-                                        //  text: 'Hello ',
-                                        //style: DefaultTextStyle.of(context).,
-                                        children:   <TextSpan>[
-                                          TextSpan(
-                                              text: 'Section:',
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Designation',
                                               style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.grey)),
-                                          TextSpan(
-                                              text: ' ${employeesProfile[0]["empSection"]}',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empDesig"]!,
                                               style: TextStyle(
-                                                  fontSize: 14,
-                                                  color: Colors.grey)),
-                                        ],
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Salary',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empSalary"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Joining Date',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["doj"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Confirmation Date',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["doc"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Section',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empSection"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Department',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empDpt"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      // Add more sections if needed
+                                    ],
+                                  )
 
-
-                              ],
+                                ],
+                              ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children:   <TextSpan>[
-                                        TextSpan(
-                                            text: 'Type:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: ' ${employeesProfile[0]["empType"]}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children:   <TextSpan>[
-                                        TextSpan(
-                                            text: 'Gender:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: ' ${employeesProfile[0]["gndr"]}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children:   <TextSpan>[
-                                        TextSpan(
-                                            text: 'Shift:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: ' ${employeesProfile[0]["empShift"]}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children: const <TextSpan>[
-                                        TextSpan(
-                                            text: 'Qualification:',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: '  ',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children: const <TextSpan>[
-                                        TextSpan(
-                                            text: '',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: '  ',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children: const <TextSpan>[
-                                        TextSpan(
-                                            text: '',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: '  ',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      //  text: 'Hello ',
-                                      //style: DefaultTextStyle.of(context).,
-                                      children: const <TextSpan>[
-                                        TextSpan(
-                                            text: '',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey)),
-                                        TextSpan(
-                                            text: '  ',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.grey)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                            SizedBox(
+                              width: 40 * SizeConfig.widthMultiplier,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Column(
 
-                              ],
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Father Name',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["fname"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Type',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empType"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Gender',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["gndr"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Shift',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empShift"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Qualification',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empEdu"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Marital Status',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                            Text(
+                                              employeesProfile[0]["empMarital"]!,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Visibility(
+                                        visible: true,
+                                        // visible: false,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Depar  tment',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                    color: Clrs.light_Grey
+                                                ),
+                                              ),
+                                              Text(
+                                                employeesProfile[0]["empDpt"]!,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                    color: Clrs.light_Grey
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+
+                                    ],
+                                  )
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -611,7 +654,7 @@ class _ProfileState extends State<Profile> {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      "Contact Info",
+                                      "Contact Info.",
                                       style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -627,7 +670,7 @@ class _ProfileState extends State<Profile> {
                                           text: TextSpan(
                                             //  text: 'Hello ',
                                             //style: DefaultTextStyle.of(context).,
-                                            children: const <TextSpan>[
+                                            children:  <TextSpan>[
                                               TextSpan(
                                                   text: 'Extension:',
                                                   style: TextStyle(
@@ -635,7 +678,7 @@ class _ProfileState extends State<Profile> {
                                                       fontWeight: FontWeight.bold,
                                                       color: Colors.grey)),
                                               TextSpan(
-                                                  text: ' +92',
+                                                  text: ' ${employeesProfile[0]["empExt"]}',
                                                   style: TextStyle(
                                                       fontSize: 14,
                                                       color: Colors.grey)),
@@ -666,28 +709,28 @@ class _ProfileState extends State<Profile> {
                                           ),
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: RichText(
-                                          text: TextSpan(
-                                            //  text: 'Hello ',
-                                            //style: DefaultTextStyle.of(context).,
-                                            children: const <TextSpan>[
-                                              TextSpan(
-                                                  text: 'Phone:',
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.grey)),
-                                              TextSpan(
-                                                  text: ' 00000',
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.grey)),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                                      // Padding(
+                                      //   padding: const EdgeInsets.all(8.0),
+                                      //   child: RichText(
+                                      //     text: TextSpan(
+                                      //       //  text: 'Hello ',
+                                      //       //style: DefaultTextStyle.of(context).,
+                                      //       children: const <TextSpan>[
+                                      //         TextSpan(
+                                      //             text: 'Phone:',
+                                      //             style: TextStyle(
+                                      //                 fontSize: 14,
+                                      //                 fontWeight: FontWeight.bold,
+                                      //                 color: Colors.grey)),
+                                      //         TextSpan(
+                                      //             text: ' 00000',
+                                      //             style: TextStyle(
+                                      //                 fontSize: 14,
+                                      //                 color: Colors.grey)),
+                                      //       ],
+                                      //     ),
+                                      //   ),
+                                      // ),
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: RichText(

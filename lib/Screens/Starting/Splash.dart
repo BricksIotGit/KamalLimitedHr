@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:kamal_limited/Screens/Setting/notification.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../styling/colors.dart';
@@ -22,10 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 2),
-            ()=>checkLogin()
-
-    );
+    Timer(const Duration(seconds: 2), () => checkLogin());
   }
 
   Future<void> checkLogin() async {
@@ -33,25 +31,20 @@ class _SplashScreenState extends State<SplashScreen> {
     final String? passwordSP = prefs.getString('password');
 
     print("splash $passwordSP password");
-    if(passwordSP ==null )
-      {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder:
-                (context) =>
-                Login()
-            ));
-      }
-
-    else{
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder:
-              (context) =>
-              Home()
-          ));
-            }
-
+    if (passwordSP == null) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Login()));
+    } else {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  // const NotificationScreen()
+                  const Home()));
+    }
     print("sharedPreff and password $passwordSP");
   }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
@@ -79,5 +72,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
         );
-      });}); }
+      });
+    });
+  }
 }

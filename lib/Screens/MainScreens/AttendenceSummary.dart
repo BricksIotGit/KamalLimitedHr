@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart' as xml;
 
 import '../../styling/colors.dart';
@@ -20,40 +21,80 @@ enum SingingCharacter { lafayette, jefferson }
 
 class _AttendanceSummaryState extends State<AttendanceSummary> {
   bool fetchOrNot = false;
+  bool fetchOrNotOverall = false;
   List<Map<String, String>> attendanceSummaryList = [];
+  List<Map<String, String>> monthlySummaryList = [];
+  List<Map<String, String>> yearSummaryList = [];
+  List<Map<String, String>> overallSummaryList = [];
+
+  double pMonthPer = 0.0,
+      aMonthPer = 0.0,
+      lMonthPer = 0.0,
+      gMonthPer = 0.0,
+      tMonthPer = 100.0;
+
+  double pYearPer = 0.0,
+      aYearPer = 0.0,
+      lYearPer = 0.0,
+      gYearPer = 0.0,
+      tYearPer = 100.0;
+
+      double pOAPer = 0.0,
+      aOAPer = 0.0,
+      lOAPer = 0.0,
+      gOAPer = 0.0,
+      tOAPer = 100.0;
+
+  String? empIDSp;
+  String username = 'xxhrms';
+  String password = 'xxhrms';
+  String? basicAuth;
 
   @override
   void initState() {
-    hitApi();
+    init();
 
     super.initState();
   }
 
+  init() async {
+    basicAuth = 'Basic ' + base64.encode(utf8.encode('$username:$password'));
+    print(basicAuth);
+    final prefs = await SharedPreferences.getInstance();
+    empIDSp = prefs.getString('empID');
+    hitApi();
+
+    hitMonthApi();
+    hitYearApi();
+    hitOverallApi();
+
+    Future.delayed(Duration(seconds: 4), () {
+      if (fetchOrNotOverall) {
+        calculatePercentage();
+      }
+    });
+    setState(() {});
+  }
+
   hitApi() async {
     fetchOrNot = true;
-    String username = 'xxhrms';
-    String password = 'xxhrms';
-    String basicAuth =
-        'Basic ' + base64.encode(utf8.encode('$username:$password'));
-    print(basicAuth);
-
     // 70500195 188700001 70500145 70500274
     var requestBody =
         '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_ATTENDANCE">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <get:GET_EMP_ATTENDANCEInput>
-         <get:P_OUTPUT-XMLTYPE-OUT/>
-         <get:P_EMP_ID-VARCHAR2-IN>'50500006'</get:P_EMP_ID-VARCHAR2-IN>
-      </get:GET_EMP_ATTENDANCEInput>
-   </soapenv:Body>
-</soapenv:Envelope>''';
+           <soapenv:Header/>
+            <soapenv:Body>
+            <get:GET_EMP_ATTENDANCEInput>
+             <get:P_OUTPUT-XMLTYPE-OUT/>
+               <get:P_EMP_ID-VARCHAR2-IN>'$empIDSp'</get:P_EMP_ID-VARCHAR2-IN>
+             </get:GET_EMP_ATTENDANCEInput>
+            </soapenv:Body>
+            </soapenv:Envelope>''';
 
     var response = await post(
       Uri.parse('http://202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_ATTENDANCE'),
       headers: {
         'content-type': 'text/xml; charset=utf-8',
-        'authorization': basicAuth
+        'authorization': basicAuth.toString()
       },
       body: utf8.encode(requestBody),
     );
@@ -94,6 +135,167 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
 
     print("");
     print("list of deptStatusList: $attendanceSummaryList");
+  }
+
+  hitMonthApi() async {
+    var requestBody =
+        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_ATTND_STATUS_MONTH">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <get:GET_ATTND_STATUS_MONTHInput>
+         <get:P_OUTPUT-XMLTYPE-OUT/>
+         <get:P_EMP_ID-VARCHAR2-IN>$empIDSp</get:P_EMP_ID-VARCHAR2-IN>
+      </get:GET_ATTND_STATUS_MONTHInput>
+   </soapenv:Body>
+</soapenv:Envelope>''';
+
+    var response = await post(
+      Uri.parse(
+          'http://202.125.141.170:8080/orawsv/XXHRMS/GET_ATTND_STATUS_MONTH'),
+      headers: {
+        'content-type': 'text/xml; charset=utf-8',
+        'authorization': basicAuth.toString()
+      },
+      body: utf8.encode(requestBody),
+    );
+
+    print("Response status: ${response.statusCode}");
+    // print("Response body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      setState(() {
+        var xmlSP = response.body.toString();
+
+        final document = xml.XmlDocument.parse(xmlSP);
+
+        // Find the elements using their tags
+        final empId = document.findAllElements('EMP_ID').single.text;
+        final pEmp = document.findAllElements('P_EMP').single.text;
+        final aEmp = document.findAllElements('A_EMP').single.text;
+        final lEmp = document.findAllElements('L_EMP').single.text;
+        final gztEmp = document.findAllElements('GZT_EMP').single.text;
+        final total = document.findAllElements('TOTAL').single.text;
+
+        setState(() {
+          monthlySummaryList.add({
+            'empId': empId,
+            'pEmp': pEmp,
+            'aEmp': aEmp,
+            'lEmp': lEmp,
+            'gztEmp': gztEmp,
+            'total': total,
+          });
+        });
+      });
+    }
+  }
+
+  hitYearApi() async {
+    var requestBody =
+        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_ATTND_STATUS_YEAR">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <get:GET_ATTND_STATUS_YEARInput>
+         <get:P_OUTPUT-XMLTYPE-OUT/>
+         <get:P_EMP_ID-VARCHAR2-IN>$empIDSp</get:P_EMP_ID-VARCHAR2-IN>
+      </get:GET_ATTND_STATUS_YEARInput>
+   </soapenv:Body>
+</soapenv:Envelope>''';
+
+    var response = await post(
+      Uri.parse(
+          'http://202.125.141.170:8080/orawsv/XXHRMS/GET_ATTND_STATUS_YEAR'),
+      headers: {
+        'content-type': 'text/xml; charset=utf-8',
+        'authorization': basicAuth.toString()
+      },
+      body: utf8.encode(requestBody),
+    );
+
+    print("Response status: ${response.statusCode}");
+    // print("Response body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      setState(() {
+        var xmlSP = response.body.toString();
+
+        final document = xml.XmlDocument.parse(xmlSP);
+
+        // Find the elements using their tags
+        final empId = document.findAllElements('EMP_ID').single.text;
+        final pEmp = document.findAllElements('P_EMP').single.text;
+        final aEmp = document.findAllElements('A_EMP').single.text;
+        final lEmp = document.findAllElements('L_EMP').single.text;
+        final gztEmp = document.findAllElements('GZT_EMP').single.text;
+        final total = document.findAllElements('TOTAL').single.text;
+
+        setState(() {
+          yearSummaryList.add({
+            'empId': empId,
+            'pEmp': pEmp,
+            'aEmp': aEmp,
+            'lEmp': lEmp,
+            'gztEmp': gztEmp,
+            'total': total,
+          });
+        });
+      });
+    }
+  }
+
+  hitOverallApi() async {
+    var requestBody =
+        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_ATTND_STATUS_OVERALL">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <get:GET_ATTND_STATUS_OVERALLInput>
+         <get:P_OUTPUT-XMLTYPE-OUT/>
+         <get:P_EMP_ID-VARCHAR2-IN>$empIDSp</get:P_EMP_ID-VARCHAR2-IN>
+      </get:GET_ATTND_STATUS_OVERALLInput>
+   </soapenv:Body>
+</soapenv:Envelope>''';
+
+    var response = await post(
+      Uri.parse(
+          'http://202.125.141.170:8080/orawsv/XXHRMS/GET_ATTND_STATUS_OVERALL'),
+      headers: {
+        'content-type': 'text/xml; charset=utf-8',
+        'authorization': basicAuth.toString()
+      },
+      body: utf8.encode(requestBody),
+    );
+
+    print("Response status: ${response.statusCode}");
+    // print("Response body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      setState(() {
+        var xmlSP = response.body.toString();
+
+        final document = xml.XmlDocument.parse(xmlSP);
+
+        // Find the elements using their tags
+        final empId = document.findAllElements('EMP_ID').single.text;
+        final pEmp = document.findAllElements('P_EMP').single.text;
+        final aEmp = document.findAllElements('A_EMP').single.text;
+        final lEmp = document.findAllElements('L_EMP').single.text;
+        final gztEmp = document.findAllElements('GZT_EMP').single.text;
+        final total = document.findAllElements('TOTAL').single.text;
+
+        setState(() {
+          fetchOrNotOverall = true;
+
+          overallSummaryList.add({
+            'empId': empId,
+            'pEmp': pEmp,
+            'aEmp': aEmp,
+            'lEmp': lEmp,
+            'gztEmp': gztEmp,
+            'total': total,
+          });
+        });
+      });
+    }
   }
 
   @override
@@ -151,21 +353,33 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                            child: Text("Month to Date"),
+                          Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  infoAlertCustom();
+                                },
+                                child: Icon(
+                                  Icons.info,
+                                  color: Colors.grey, // Customize the icon color here
+                                  size: 24, // Customize the icon size here
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+                                child: Text("Month to Date"),
+                              ),
+                            ],
                           ),
                           Column(
                             children: [
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                                 child: Table(
-                                  defaultColumnWidth: FixedColumnWidth(30.0),
-                                  // border: TableBorder.all(
-                                  //     color: Clrs.dark_Grey, style: BorderStyle.solid, width: 0),
+                                  defaultColumnWidth: FixedColumnWidth(45.0),
                                   children: [
                                     TableRow(children: [
-                                      Column(children: [Text('L')]),
+                                      // Column(children: [Text('L')]),
                                       Column(children: [Text('P')]),
                                       Column(children: [Text('A')]),
                                       Column(children: [Text('L')]),
@@ -175,31 +389,70 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                   ],
                                 ),
                               ),
-                              Table(
-                                defaultColumnWidth: FixedColumnWidth(30.0),
-                                border: TableBorder.all(
-                                    color: Clrs.dark_Grey,
-                                    style: BorderStyle.solid,
-                                    width: 1),
-                                children: [
-                                  TableRow(children: [
-                                    Column(children: [Text('2')]),
-                                    Column(children: [Text('2')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                  ]),
-                                  TableRow(children: [
-                                    Column(children: [Text('4')]),
-                                    Column(children: [Text('4')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                  ]),
-                                ],
-                              ),
+                              fetchOrNotOverall
+                                  ? Table(
+                                      defaultColumnWidth:
+                                          FixedColumnWidth(45.0),
+                                      border: TableBorder.all(
+                                          color: Clrs.dark_Grey,
+                                          style: BorderStyle.solid,
+                                          width: 1),
+                                      children: [
+                                        TableRow(children: [
+                                          // Column(children: [Text('2')]),
+                                          Column(children: [
+                                            Text(
+                                                '${monthlySummaryList[0]['pEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${monthlySummaryList[0]['aEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${monthlySummaryList[0]['lEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${monthlySummaryList[0]['gztEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${monthlySummaryList[0]['total']}')
+                                          ]),
+                                        ]),
+                                        TableRow(children: [
+                                          Column(children: [
+                                            Text(
+                                              '${pMonthPer.toInt()} %',
+                                              style: (TextStyle(fontSize: 11)),
+                                            )
+                                          ]),
+                                          Column(
+                                              children: [Text(
+                                                '${aMonthPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${lMonthPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${gMonthPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${tMonthPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                        ]),
+                                      ],
+                                    )
+                                  : CircularProgressIndicator(
+                                      color: Colors.grey),
                             ],
                           ),
                         ],
@@ -216,31 +469,70 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                           ),
                           Column(
                             children: [
-                              Table(
-                                defaultColumnWidth: FixedColumnWidth(30.0),
-                                border: TableBorder.all(
-                                    color: Clrs.dark_Grey,
-                                    style: BorderStyle.solid,
-                                    width: 1),
-                                children: [
-                                  TableRow(children: [
-                                    Column(children: [Text('2')]),
-                                    Column(children: [Text('2')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                  ]),
-                                  TableRow(children: [
-                                    Column(children: [Text('4')]),
-                                    Column(children: [Text('4')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                  ]),
-                                ],
-                              ),
+                              fetchOrNotOverall
+                                  ? Table(
+                                      defaultColumnWidth:
+                                          FixedColumnWidth(45.0),
+                                      border: TableBorder.all(
+                                          color: Clrs.dark_Grey,
+                                          style: BorderStyle.solid,
+                                          width: 1),
+                                      children: [
+                                        TableRow(children: [
+                                          //  Column(children: [Text('2')]),
+                                          Column(children: [
+                                            Text(
+                                                '${yearSummaryList[0]['pEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${yearSummaryList[0]['aEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${yearSummaryList[0]['lEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${yearSummaryList[0]['gztEmp']}')
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${yearSummaryList[0]['total']}')
+                                          ]),
+                                        ]),
+                                        TableRow(children: [
+                                          Column(children: [
+                                            Text(
+                                              '${pYearPer.toInt()} %',
+                                              style: (TextStyle(fontSize: 11)),
+                                            )
+                                          ]),
+                                          Column(
+                                              children: [Text(
+                                                '${aYearPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${lYearPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${gYearPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${tYearPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                        ]),
+                                      ],
+                                    )
+                                  : CircularProgressIndicator(
+                                      color: Colors.grey),
                             ],
                           ),
                         ],
@@ -257,75 +549,75 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                           ),
                           Column(
                             children: [
-                              Table(
-                                defaultColumnWidth: FixedColumnWidth(30.0),
-                                border: TableBorder.all(
-                                    color: Clrs.dark_Grey,
-                                    style: BorderStyle.solid,
-                                    width: 1),
-                                children: [
-                                  TableRow(children: [
-                                    Column(children: [Text('2')]),
-                                    Column(children: [Text('2')]),
-                                    Column(children: [Text('9')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                  ]),
-                                  TableRow(children: [
-                                    Column(children: [Text('4')]),
-                                    Column(children: [Text('4')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                    Column(children: [Text('5')]),
-                                  ]),
-                                ],
-                              ),
+                              fetchOrNotOverall
+                                  ? Table(
+                                      defaultColumnWidth:
+                                          FixedColumnWidth(45.0),
+                                      border: TableBorder.all(
+                                          color: Clrs.dark_Grey,
+                                          style: BorderStyle.solid,
+                                          width: 1),
+                                      children: [
+                                        TableRow(children: [
+                                          // Column(children: [Text('2')]),
+                                          Column(children: [
+                                            Text(
+                                                '${overallSummaryList[0]['pEmp']}',     style: (TextStyle(fontSize: 12)))
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${overallSummaryList[0]['aEmp']}',     style: (TextStyle(fontSize: 12)))
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${overallSummaryList[0]['lEmp']}',     style: (TextStyle(fontSize: 12)))
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${overallSummaryList[0]['gztEmp']}',     style: (TextStyle(fontSize: 12)))
+                                          ]),
+                                          Column(children: [
+                                            Text(
+                                                '${overallSummaryList[0]['total']}',     style: (TextStyle(fontSize: 12)),)
+                                          ]),
+                                        ]),
+                                        TableRow(children: [
+                                          Column(children: [
+                                            Text(
+                                              '${pOAPer.toInt()} %',
+                                              style: (TextStyle(fontSize: 11)),
+                                            )
+                                          ]),
+                                          Column(
+                                              children: [Text(
+                                                '${aOAPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${lOAPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${gOAPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                          Column(
+                                              children: [Text(
+                                                '${tOAPer.toInt()} %',
+                                                style: (TextStyle(fontSize: 11)),
+                                              )]),
+                                        ]),
+                                      ],
+                                    )
+                                  : CircularProgressIndicator(
+                                      color: Colors.grey),
                             ],
                           ),
                         ],
                       ),
                     ),
-                    // Align(
-                    //   alignment: Alignment.centerLeft,
-                    //   child: Padding(
-                    //     padding: const EdgeInsets.fromLTRB(20, 20, 0, 0),
-                    //     child:
-                    //         Text("Select Date", style: TextStyle(fontSize: 16)),
-                    //   ),
-                    // ),
-                    // ListTile(
-                    //   title: const Text(
-                    //     'Weekly',
-                    //     style: TextStyle(fontSize: 14),
-                    //   ),
-                    //   leading: Radio<SingingCharacter>(
-                    //     value: SingingCharacter.lafayette,
-                    //     groupValue: _character,
-                    //     onChanged: (SingingCharacter? value) {
-                    //       setState(() {
-                    //         _character = value;
-                    //       });
-                    //     },
-                    //   ),
-                    // ),
-                    // ListTile(
-                    //   title: const Text(
-                    //     'Monthly',
-                    //     style: TextStyle(fontSize: 14),
-                    //   ),
-                    //   leading: Radio<SingingCharacter>(
-                    //     value: SingingCharacter.jefferson,
-                    //     groupValue: _character,
-                    //     onChanged: (SingingCharacter? value) {
-                    //       setState(() {
-                    //         _character = value;
-                    //       });
-                    //     },
-                    //   ),
-                    // ),
-
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
                       child: Container(
@@ -467,42 +759,50 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                   title: Column(
                                     children: [
                                       Row(
-                                        // mainAxisAlignment:
-                                        //     MainAxisAlignment.spaceBetween,
+
                                         children: [
                                           Expanded(
                                               child: Center(
-                                                child: Text(
-                                                  attendanceSummaryList[index]
-                                                      ['ATTND_DATE']!,
-                                                  style: TextStyle(
-                                                      // fontWeight: FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Clrs.dark_Grey),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(2.0),
+                                                  child: Text(
+                                                    attendanceSummaryList[index]
+                                                        ['ATTND_DATE']!,
+                                                    style: TextStyle(
+                                                        // fontWeight: FontWeight.bold,
+                                                        fontSize: 12,
+                                                        color: Clrs.dark_Grey),
+                                                  ),
                                                 ),
                                               ),
                                               flex: 1),
                                           Expanded(
                                               child: Center(
-                                                child: Text(
-                                                  attendanceSummaryList[index]
-                                                      ['TIME_IN']!,
-                                                  style: TextStyle(
-                                                      // fontWeight: FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Clrs.dark_Grey),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(2.0),
+                                                  child: Text(
+                                                    attendanceSummaryList[index]
+                                                        ['TIME_IN']!,
+                                                    style: TextStyle(
+                                                        // fontWeight: FontWeight.bold,
+                                                        fontSize: 12,
+                                                        color: Clrs.dark_Grey),
+                                                  ),
                                                 ),
                                               ),
                                               flex: 1),
                                           Expanded(
                                               child: Center(
-                                                child: Text(
-                                                  attendanceSummaryList[index]
-                                                      ['TIME_OUT']!,
-                                                  style: TextStyle(
-                                                      // fontWeight: FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Clrs.dark_Grey),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(2.0),
+                                                  child: Text(
+                                                    attendanceSummaryList[index]
+                                                        ['TIME_OUT']!,
+                                                    style: TextStyle(
+                                                        // fontWeight: FontWeight.bold,
+                                                        fontSize: 12,
+                                                        color: Clrs.dark_Grey),
+                                                  ),
                                                 ),
                                               ),
                                               flex: 1),
@@ -520,37 +820,20 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
                                               flex: 1),
                                           Expanded(
                                               child: Center(
-                                                child: Text(
-                                                  attendanceSummaryList[index]
-                                                      ['STATUS']!,
-                                                  style: TextStyle(
-                                                      //  fontWeight: FontWeight.bold,
-                                                      fontSize: 12,
-                                                      color: Clrs.dark_Grey),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(2.0),
+                                                  child: Text(
+                                                    attendanceSummaryList[index]
+                                                        ['STATUS']!,
+                                                    style: TextStyle(
+                                                        //  fontWeight: FontWeight.bold,
+                                                        fontSize: 12,
+                                                        color: Clrs.dark_Grey),
+                                                  ),
                                                 ),
                                               ),
                                               flex: 1),
-                                          // Flexible(
-                                          //     child: ElevatedButton(
-                                          //       onPressed: () {
-                                          //         Navigator.pushReplacement(
-                                          //             context,
-                                          //             MaterialPageRoute(
-                                          //                 builder: (context) =>
-                                          //                     Home()));
-                                          //       },
-                                          //       child: Text('Action',
-                                          //           style: TextStyle(
-                                          //             fontSize: 7,
-                                          //             color: Colors.black,
-                                          //           )),
-                                          //       style: ElevatedButton.styleFrom(
-                                          //         backgroundColor: Clrs.white,
-                                          //         shape: StadiumBorder(),
-                                          //         minimumSize: Size(50, 20),
-                                          //       ),
-                                          //     ),
-                                          //     flex: 1)
+
                                         ],
                                       ),
                                       Divider(),
@@ -572,4 +855,146 @@ class _AttendanceSummaryState extends State<AttendanceSummary> {
       ),
     );
   }
+
+  void calculatePercentage() {
+    pMonthPer = _percentage(
+        monthlySummaryList[0]['pEmp'], monthlySummaryList[0]['total']);
+    aMonthPer = _percentage(
+        monthlySummaryList[0]['aEmp'], monthlySummaryList[0]['total']);
+    lMonthPer = _percentage(
+        monthlySummaryList[0]['lEmp'], monthlySummaryList[0]['total']);
+    gMonthPer = _percentage(
+        monthlySummaryList[0]['gztEmp'], monthlySummaryList[0]['total']);
+
+    pYearPer = _percentage(
+        yearSummaryList[0]['pEmp'], yearSummaryList[0]['total']);
+    aYearPer = _percentage(
+        yearSummaryList[0]['aEmp'], yearSummaryList[0]['total']);
+    lYearPer = _percentage(
+        yearSummaryList[0]['lEmp'], yearSummaryList[0]['total']);
+    gYearPer = _percentage(
+        yearSummaryList[0]['gztEmp'], yearSummaryList[0]['total']);
+
+
+    pOAPer = _percentage(
+        overallSummaryList[0]['pEmp'], overallSummaryList[0]['total']);
+    aOAPer = _percentage(
+        overallSummaryList[0]['aEmp'], overallSummaryList[0]['total']);
+    lOAPer = _percentage(
+        overallSummaryList[0]['lEmp'], overallSummaryList[0]['total']);
+    gOAPer = _percentage(
+        overallSummaryList[0]['gztEmp'], overallSummaryList[0]['total']);
+
+
+    setState(() {});
+  }
+
+  _percentage(value, totalvalue) {
+    var val1 = double.parse(value);
+    var val2 = double.parse(totalvalue);
+
+    var formula=(val1 / val2) * 100;
+
+    if(formula.isNaN || formula.isInfinite){
+      formula=0.0;
+    }
+    return formula;
+  }
+
+  void infoAlertCustom() {
+    Dialog errorDialog = Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'P :',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: 'Present'),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'A :',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: 'Absent'),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'L: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: 'Leave'),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'G :',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: 'GZT'),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'T :',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: 'Total'),
+                  ],
+                ),
+              ),
+            ),
+            Padding(padding: EdgeInsets.only(top: 50.0)),
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Close!',
+                  style: TextStyle(color: Colors.red, fontSize: 16.0),
+                ))
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => errorDialog);
+  }
+
 }

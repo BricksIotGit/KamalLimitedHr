@@ -33,11 +33,66 @@ class _DepartmentStatusState extends State<DepartmentStatus> {
     'GD - INFORMATION TECHNOLOGY',
     'GD - HUMAN RESOURCES',
   ];
-
+  String username = 'xxhrms';
+  String password = 'xxhrms';
+  String basicAuth="";
   @override
   void initState() {
     //hitApi();
+    init();
+    getAllDept();
     super.initState();
+  }
+  init(){
+     basicAuth = 'Basic ' + base64.encode(utf8.encode('$username:$password'));
+    print(basicAuth);
+  }
+  Future<void> getAllDept() async {
+
+    // http://202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_DEPT
+    var requestBody = '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DEPT">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <get:GET_EMP_DEPTInput>
+         <get:P_OUTPUT-XMLTYPE-OUT/>
+      </get:GET_EMP_DEPTInput>
+   </soapenv:Body>
+</soapenv:Envelope>''';
+
+    var response = await post(
+      Uri.parse('http://202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_DEPT'),
+      headers: {
+        'content-type': 'text/xml; charset=utf-8',
+        'authorization': basicAuth
+      },
+      body: utf8.encode(requestBody),
+    );
+
+    print("Response status: ${response.statusCode}");
+
+    if(response.statusCode==200){
+      final document =  xml.XmlDocument.parse(response.body.toString());
+      final rowsetElement = document.findAllElements('ROWSET').single;
+      List< xml.XmlElement> rowElements = rowsetElement.findAllElements('ROW').toList();
+
+      itemsOfdept.clear();
+      itemsOfdept.add("ALL");
+      for (final rowElement in rowElements) {
+        String? deptId = rowElement.getElement('DEPT_ID')?.text;
+        String? empDepartment = rowElement.getElement('EMP_DEPARTMENT')?.text;
+
+        print('DEPT_ID: $deptId');
+        print('EMP_DEPARTMENT: $empDepartment');
+        print('----------------------------------');
+        itemsOfdept.add('$empDepartment');
+      }
+      setState(() {
+
+      });
+      print("itemsOfdept complete: $itemsOfdept");
+
+    }
+
   }
 
   hitApi(String formattedDate) async {
@@ -53,11 +108,7 @@ class _DepartmentStatusState extends State<DepartmentStatus> {
     print("hit api DPT: $concatDPT");
     print("hit api DPT: $concatDate");
 
-    String username = 'xxhrms';
-    String password = 'xxhrms';
-    String basicAuth =
-        'Basic ' + base64.encode(utf8.encode('$username:$password'));
-    print(basicAuth);
+
 
     // 70500195 188700001 70500145 70500274
     var requestBody = '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DEPT_STATUS">
@@ -340,7 +391,7 @@ class _DepartmentStatusState extends State<DepartmentStatus> {
 
               SizedBox(
                 width: SizeConfig.widthMultiplier * 100,
-                height: SizeConfig.heightMultiplier * 40,
+                height: SizeConfig.heightMultiplier * 60,
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Container(
@@ -431,4 +482,5 @@ class _DepartmentStatusState extends State<DepartmentStatus> {
       ),
     );
   }
+
 }
