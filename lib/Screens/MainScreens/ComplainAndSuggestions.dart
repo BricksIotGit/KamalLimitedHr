@@ -1,11 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:kamal_limited/utils/Toast.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xml/xml.dart' as xml;
 
 import '../../styling/colors.dart';
 import '../../styling/images.dart';
@@ -160,19 +161,17 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         labelText: 'Subject',
-                        labelStyle: TextStyle(color: Colors.black)),
+                        labelStyle: TextStyle(color: Colors.grey)),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                   child: TextFormField(
-
                     controller: bodyControl,
                     cursorColor: Colors.black,
                     style: const TextStyle(color: Colors.black),
                     decoration: const InputDecoration(
                         contentPadding: EdgeInsets.fromLTRB(10, 40, 10, 40),
-
                         isDense: true,
                         focusedBorder: OutlineInputBorder(
                           borderSide:
@@ -190,7 +189,7 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         labelText: 'Body',
-                        labelStyle: TextStyle(color: Colors.black)),
+                        labelStyle: TextStyle(color: Colors.grey)),
                     maxLines: 15,
                     minLines: 3,
                   ),
@@ -201,30 +200,26 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
                     onPressed: () {
                       var type = "";
                       if (complainType) {
-                        print("complain type: $complainType");
                         type = "Complain";
                       } else if (suggestionType) {
-                        print("suggestion type: $suggestionType");
                         type = "Suggestion";
-                      } else if (complainType == false &&
-                          suggestionType == false) {
-                        toast("Type must be selected");
-
                       }
-                      else if(subjectControl.text.isEmpty){
-                        toast("Subject must not empty!");
-                                              }
-                      else if(bodyControl.text.isEmpty){
-                        toast("Body must not empty!");
-                                              }
 
-                      else {
-                        print("sumit api subject text: ${subjectControl.text}");
-                        print("sumit api body text: ${bodyControl.text}");
+                      if (complainType == false && suggestionType == false) {
+                        toast("Type must be selected");
+                      } else if (subjectControl.text.isEmpty) {
+                        toast("Subject must not be empty!");
+                      }else if (bodyControl.text.isEmpty) {
+                        toast("Body must not be empty!");
+                      }
 
-                        // submitApi(type);
-                        // Navigator.pushReplacement(
-                        //     context, MaterialPageRoute(builder: (context) => Home()));
+                      if ((complainType != false || suggestionType != false) && subjectControl.text.isNotEmpty && bodyControl.text.isNotEmpty) {
+                        // All conditions are met
+                        print("submit api subject text: ${subjectControl.text}");
+                        print("submit api body text: ${bodyControl.text}");
+
+                        submitApi(type);
+                        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
                       }
                     },
                     child: Text('Submit',
@@ -247,14 +242,10 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
   }
 
   Future<void> submitApi(String type) async {
-
     DateTime now = new DateTime.now();
     DateTime date = new DateTime(now.year, now.month, now.day);
-    String formattedDate = DateFormat('dd-MMM-yyyy')
-        .format(date)
-        .toUpperCase();
+    String formattedDate = DateFormat('dd-MMM-yyyy').format(date).toUpperCase();
     print("date is $formattedDate");
-
 
     String username = 'xxhrms';
     String password = 'xxhrms';
@@ -265,23 +256,22 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
     // 70500195 188700001 70500145 70500274
 
     var requestBody =
-        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:post="http://xmlns.oracle.com/orawsv/XXHRMS/POST_EMP_FEEBACK">
+        '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:post="http://xmlns.oracle.com/orawsv/XXHRMS/POST_EMP_FEEDBACK">
    <soapenv:Header/>
    <soapenv:Body>
-      <post:POST_EMP_FEEBACKInput>
+      <post:POST_EMP_FEEDBACKInput>
          <post:P_OUTPUT-VARCHAR2-OUT/>
          <post:P_FEEDBACK_TYPE-VARCHAR2-IN>$type</post:P_FEEDBACK_TYPE-VARCHAR2-IN>
          <post:P_FEEDBACK_SUBJECT-VARCHAR2-IN>${subjectControl.text}</post:P_FEEDBACK_SUBJECT-VARCHAR2-IN>
          <post:P_FEEDBACK_DATE-DATE-IN>$formattedDate</post:P_FEEDBACK_DATE-DATE-IN>
          <post:P_FEEDBACK_BODY-VARCHAR2-IN>${bodyControl.text}</post:P_FEEDBACK_BODY-VARCHAR2-IN>
          <post:P_EMP_ID-VARCHAR2-IN>$empID</post:P_EMP_ID-VARCHAR2-IN>
-      </post:POST_EMP_FEEBACKInput>
+      </post:POST_EMP_FEEDBACKInput>
    </soapenv:Body>
 </soapenv:Envelope>''';
 
     var response = await post(
-      Uri.parse(
-          'http://XXHRMS:XXHRMS@202.125.141.170:8080/orawsv/XXHRMS/SUBMIT_EMP_LEAVES'),
+      Uri.parse('http://202.125.141.170:8080/orawsv/XXHRMS/POST_EMP_FEEDBACK'),
       headers: {
         'content-type': 'text/xml; charset=utf-8',
         'authorization': basicAuth
@@ -296,7 +286,95 @@ class _ComplainAndSuggestionsState extends State<ComplainAndSuggestions> {
 
     if (response.statusCode == 200) {
       print("Api hit");
+
+      final document = xml.XmlDocument.parse(xmlString);
+
+      final outputElement = document.findAllElements('P_OUTPUT').single;
+
+      final outputValue = outputElement.text;
+
+      print('P_OUTPUT value: $outputValue');
+
+      if(outputValue=="Request Submitted"){
+        submitAlertCustom();
+
+      }else{
+        errorCustom("$outputValue");
+
+      }
+
     }
+  }
+  void submitAlertCustom() {
+    Dialog doneDialog = Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      //this right here
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_8XY7J1RJeZ.json")
+            ),
+
+            Padding(padding: EdgeInsets.only(top: 5.0)),
+            TextButton(
+                onPressed: () {
+                  //  Navigator.of(context).pop();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: Text(
+                  'Close!',
+                  style: TextStyle(color: Colors.green, fontSize: 16.0),
+                ))
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => doneDialog);
+  }
+  void errorCustom(String msg) {
+    Dialog errorDialog = Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      //this right here
+      child: Container(
+        height: 300.0,
+        width: 300.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 200,
+              width: 200,
+              child: Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_O6BZqckTma.json")
+              ),
+            ),
+
+            Padding(padding: EdgeInsets.only(top: 5.0)),
+            Text("Reason: $msg"),
+            TextButton(
+                onPressed: () {
+                  //  Navigator.of(context).pop();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                },
+                child: Text(
+                  'Close!',
+                  style: TextStyle(color: Colors.red, fontSize: 16.0),
+                ))
+          ],
+        ),
+      ),
+    );
+    showDialog(
+        context: context, builder: (BuildContext context) => errorDialog);
   }
 
   Future<void> setId() async {

@@ -4,7 +4,6 @@ import 'package:get/state_manager.dart';
 import 'package:kamal_limited/authenticatons/AuthenticationRepo.dart';
 
 class SignUpController extends GetxController {
-
   static SignUpController get instance => Get.find();
 
   //TextField Controllers to get data from TextFields

@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -68,7 +69,6 @@ class _LoginState extends State<Login> {
                   padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
                   child: TextFormField(
                     keyboardType: TextInputType.number,
-
                     controller: controller.empID,
                     cursorColor: Clrs.white,
                     style: const TextStyle(color: Colors.white54),
@@ -97,7 +97,7 @@ class _LoginState extends State<Login> {
                   child: TextFormField(
                     controller: controller.password,
                     cursorColor: Clrs.white,
-                      obscureText: true,
+                    obscureText: true,
                     style: const TextStyle(color: Colors.white54),
                     decoration: const InputDecoration(
                         focusedBorder: OutlineInputBorder(
@@ -131,8 +131,8 @@ class _LoginState extends State<Login> {
                   padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                   child: isLoading
                       ? Center(
-                    child: CircularProgressIndicator(),
-                  )
+                          child: CircularProgressIndicator(),
+                        )
                       : SizedBox(),
                 ),
                 Padding(
@@ -140,22 +140,17 @@ class _LoginState extends State<Login> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-
                         setState(() {
                           isLoading = true;
-
                         });
 
                         getLogins(controller.empID.text.trim(),
                             controller.password.text.trim());
 
-
-
-                      //   LoginUpController.instance.loginUser(
-                      //       controller.email.text.trim(),
-                      //       controller.password.text.trim());
-
-                  }
+                        //   LoginUpController.instance.loginUser(
+                        //       controller.email.text.trim(),
+                        //       controller.password.text.trim());
+                      }
                       // Navigator.pushReplacement(
                       //     context, MaterialPageRoute(builder: (context) => Home()));
                     },
@@ -203,61 +198,56 @@ class _LoginState extends State<Login> {
       ),
     );
   }
-  Future<void> getLogins(String empID, String password) async {
 
+  Future<void> getLogins(String empID, String password) async {
     FirebaseDatabase database = FirebaseDatabase.instance;
     final ref = database.ref();
 
-
     final snapshot = await ref.child('usersLogin/$empID').get();
+
     if (snapshot.exists) {
       setState(() {
         isLoading = false;
-
       });
       print("Login is v: ${snapshot.value}");
       print("Login is K: ${snapshot.key}");
 
-
-      for(var a in snapshot.children){
-
-
-        if(a.key=='password'){
-          var passIs=a.value;
+      for (var a in snapshot.children) {
+        if (a.key == 'password') {
+          var passIs = a.value;
           print("a Login is ${passIs}");
-          if(passIs.toString()==password){
-           // toast("Password Match",print: true);
+          if (passIs.toString() == password) {
+            // toast("Password Match",print: true);
 
-            if(password=='123456') {
+            if (password == '123456') {
+              await FirebaseMessaging.instance
+                  .subscribeToTopic(controller.empID.text);
+              print("subscribed : ${controller.empID.text}");
               Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) =>
-                  UpdateProfile(controller.empID.text.trim())));
-            }
-            else{
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          UpdateProfile(controller.empID.text.trim())));
+            } else {
               storeLogin(controller.empID.text, controller.password.text);
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (context) =>
-                  Home()));
+              await FirebaseMessaging.instance
+                  .subscribeToTopic(controller.empID.text);
+              print("subscribed : ${controller.empID.text}");
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => const Home()));
             }
-
             // storeLogin( controller.empID.text.trim(),
             //     controller.password.text.trim());
-          }else
-            toast("Wrong password!",print: true);
-
+          } else
+            toast("Wrong password!", print: true);
         }
-        if(a.key=='userId'){
-
+        if (a.key == 'userId') {
           print("a Login is ${a.value}");
-
         }
-
       }
-
     } else {
       setState(() {
         isLoading = false;
-
       });
       print('No data available.');
       toast("No account exist");
@@ -268,7 +258,6 @@ class _LoginState extends State<Login> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('empID', empId);
     await prefs.setString('password', password);
-
 
     final String? empIDSp = prefs.getString('empID');
     final String? passwordSP = prefs.getString('password');

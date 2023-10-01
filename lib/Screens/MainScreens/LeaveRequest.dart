@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
@@ -7,10 +7,10 @@ import 'package:kamal_limited/utils/Toast.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart' as xml;
-
 import '../../styling/colors.dart';
 import '../../styling/images.dart';
 import '../../styling/size_config.dart';
+import '../../utils/sentNotification.dart';
 import 'Home.dart';
 
 class LeaveRequest extends StatefulWidget {
@@ -36,7 +36,6 @@ class _LeaveRequestState extends State<LeaveRequest> {
 
   TextEditingController dateFromInput = TextEditingController();
   TextEditingController dateToInput = TextEditingController();
-
   TextEditingController textReason = TextEditingController();
   String? postLeaveID;
   String? postSessionID;
@@ -63,7 +62,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
     'Annual',
     'Half Sick',
     'Casual',
-    'CPL',
+    // 'CPL',
     'Half Casual'
   ];
 
@@ -119,9 +118,8 @@ class _LeaveRequestState extends State<LeaveRequest> {
     print("Response employeesNode: ${rowset}");
 
     for (var row in rowset.findAllElements('ROW')) {
-      print("row loop $row");
+      //   print("row loop $row");
       final empId = row.findElements('EMP_ID').single.text;
-
       final lvType = row.findElements('LV_TYPE').single.text;
       final lvId = row.findElements('LV_ID').single.text;
       final lvBal = row.findElements('LV_BAL').single.text;
@@ -258,7 +256,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
       } else {
         print("cal 4: $a");
 
-        a=1.0 + a!;
+        a = 1.0 + a!;
         print("cal 4: $a");
 
         // a=(a + 1.0);
@@ -347,10 +345,10 @@ class _LeaveRequestState extends State<LeaveRequest> {
                             //             style: TextStyle(fontSize: 15),
                             //           )
                             //         : SizedBox.shrink()),
-                            Text(
-                              "CPL",
-                              style: TextStyle(fontSize: 15),
-                            ),
+                            // Text(
+                            //   "CPL",
+                            //   style: TextStyle(fontSize: 15),
+                            // ),
                           ],
                         ),
                       ),
@@ -398,13 +396,13 @@ class _LeaveRequestState extends State<LeaveRequest> {
                             //             style: TextStyle(fontSize: 15),
                             //           )
                             //         : SizedBox.shrink()),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: Text(
-                                "$cplDue",
-                                style: TextStyle(fontSize: 15),
-                              ),
-                            ),
+                            // Padding(
+                            //   padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            //   child: Text(
+                            //     "$cplDue",
+                            //     style: TextStyle(fontSize: 15),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -445,10 +443,10 @@ class _LeaveRequestState extends State<LeaveRequest> {
                             //             style: TextStyle(fontSize: 15),
                             //           )
                             //         : SizedBox.shrink()),
-                            Text(
-                              "$cplFA",
-                              style: TextStyle(fontSize: 15),
-                            ),
+                            // Text(
+                            //   "$cplFA",
+                            //   style: TextStyle(fontSize: 15),
+                            // ),
                           ],
                         ),
                       ),
@@ -485,10 +483,10 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                         "$annualHA",
                                         style: TextStyle(fontSize: 15),
                                       )),
-                            Text(
-                              "$cplHA",
-                              style: TextStyle(fontSize: 15),
-                            ),
+                            // Text(
+                            //   "$cplHA",
+                            //   style: TextStyle(fontSize: 15),
+                            // ),
                           ],
                         ),
                       ),
@@ -525,10 +523,10 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                         "$annualBal",
                                         style: TextStyle(fontSize: 15),
                                       )),
-                            Text(
-                              "$cplBal",
-                              style: TextStyle(fontSize: 15),
-                            ),
+                            // Text(
+                            //   "$cplBal",
+                            //   style: TextStyle(fontSize: 15),
+                            // ),
                           ],
                         ),
                       ),
@@ -586,27 +584,25 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               } else if (index == 1) {
                                 valueAnnualCheck = value;
 
-
-                                  valueHalfSickCheck = false;
-                                  valueHalfCasualCheck = false;
-                                  valueCPLCheck = false;
-                                  // valueAnnualCheck2 = false;
-                                  valueSickCheck = false;
-                                  valueCasualCheck = false;
-                                  difference = _calculateDifference()!;
-                                setState(() {  });
+                                valueHalfSickCheck = false;
+                                valueHalfCasualCheck = false;
+                                valueCPLCheck = false;
+                                // valueAnnualCheck2 = false;
+                                valueSickCheck = false;
+                                valueCasualCheck = false;
+                                difference = _calculateDifference()!;
+                                setState(() {});
                               } else if (index == 2) {
                                 valueHalfSickCheck = value;
 
-
-                                  valueSickCheck = false;
-                                  valueHalfCasualCheck = false;
-                                  valueCPLCheck = false;
-                                  // valueAnnualCheck2 = false;
-                                  valueAnnualCheck = false;
-                                  valueCasualCheck = false;
-                                  difference = _calculateDifference()!;
-                                setState(() {  });
+                                valueSickCheck = false;
+                                valueHalfCasualCheck = false;
+                                valueCPLCheck = false;
+                                // valueAnnualCheck2 = false;
+                                valueAnnualCheck = false;
+                                valueCasualCheck = false;
+                                difference = _calculateDifference()!;
+                                setState(() {});
                               } else if (index == 3) {
                                 valueCasualCheck = value;
                                 valueHalfSickCheck = false;
@@ -862,11 +858,17 @@ class _LeaveRequestState extends State<LeaveRequest> {
                           final prefs = await SharedPreferences.getInstance();
                           final String? empIDSp = prefs.getString('empID');
 
-                          if (valueSickCheck || valueHalfSickCheck) {
+                          if (valueSickCheck) {
                             postLeaveID = sickID;
                             postSessionID = sickSession;
-                          } else if (valueCasualCheck || valueHalfCasualCheck) {
+                          } else if (valueHalfSickCheck) {
+                            postLeaveID = '18';
+                            postSessionID = sickSession;
+                          } else if (valueCasualCheck) {
                             postLeaveID = casualID;
+                            postSessionID = casualSession;
+                          } else if (valueHalfCasualCheck) {
+                            postLeaveID = '17';
                             postSessionID = casualSession;
                           } else if (valueAnnualCheck) {
                             postLeaveID = annualID;
@@ -890,7 +892,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
 
                           bool checkLeaves = false;
 
-                          if (postLeaveID == '12') {
+                          if (postLeaveID == '12' || postLeaveID == '18') {
                             //sick
 
                             var parseBln = double.parse(sickBal!);
@@ -902,7 +904,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               checkLeaves = true;
                             } else {
                               checkLeaves = false;
-                             // toast("Cannot submit selected Leave type!");
+                              // toast("Cannot submit selected Leave type!");
 
                               print("sick leave can't post");
                             }
@@ -922,7 +924,8 @@ class _LeaveRequestState extends State<LeaveRequest> {
 
                               print("anual leave can't post");
                             }
-                          } else if (postLeaveID == '11') {
+                          } else if (postLeaveID == '11' ||
+                              postLeaveID == '17') {
                             //casual
 
                             var parseBln = double.parse(casualBal!);
@@ -950,14 +953,14 @@ class _LeaveRequestState extends State<LeaveRequest> {
                               checkLeaves = true;
                             } else {
                               checkLeaves = false;
-                            //  toast("Cannot submit selected Leave type!");
+                              //  toast("Cannot submit selected Leave type!");
 
                               print("cpl leave can't post");
                             }
                           }
 
                           if (postSessionID == null || postSessionID == "") {
-                            toast("Must select leave type!");
+                            toast("Select leave type!");
                             print("postsessionId is null");
                           } else if (empIDSp == null || empIDSp == "") {
                             print("empIDSp is null");
@@ -981,14 +984,11 @@ class _LeaveRequestState extends State<LeaveRequest> {
                           } else if (!checkLeaves) {
                             errorCustom("Cannot submit selected type!");
 
-                           // toast("No due leave available!");
+                            // toast("No due leave available!");
                             //toast("Cant submit request on this leave type!");
-                          }
-                          else if(difference <=  0.0){
+                          } else if (difference <= 0.0) {
                             errorCustom("Select correct dates!");
-
-                          }
-                          else {
+                          } else {
                             setState(() {
                               _errorTextReason = null;
                               _errorTextEFD = null;
@@ -998,7 +998,6 @@ class _LeaveRequestState extends State<LeaveRequest> {
                             //toast("Submitted");
                             print(
                                 "postsesionID: ${postSessionID}  & Leave_ID: ${postLeaveID} & empID: ${empIDSp} To Date: ${dateToInput.text} & From Date: ${dateFromInput.text} & Days in Num: ${difference}");
-
 
                             submitApiHit(
                                 postSessionID!,
@@ -1030,6 +1029,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
     );
   }
 
+
   Future<void> submitApiHit(
       String postSessionID,
       String empIDSp,
@@ -1053,6 +1053,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
       <sub:SUBMIT_EMP_LEAVESInput>
          <sub:P_TO_DATE-DATE-IN>$dateToInput</sub:P_TO_DATE-DATE-IN>
          <sub:P_SESSION_ID-NUMBER-IN>$postSessionID</sub:P_SESSION_ID-NUMBER-IN>
+          <sub:P_REASON-VARCHAR2-IN>${textReason.text}</sub:P_REASON-VARCHAR2-IN>
          <sub:P_OUTPUT-VARCHAR2-OUT/>
          <sub:P_L_DAY-NUMBER-IN>$daysInNumCont</sub:P_L_DAY-NUMBER-IN>
          <sub:P_LV_ID-NUMBER-IN>$postLeaveID</sub:P_LV_ID-NUMBER-IN>
@@ -1062,7 +1063,6 @@ class _LeaveRequestState extends State<LeaveRequest> {
       </sub:SUBMIT_EMP_LEAVESInput>
    </soapenv:Body>
 </soapenv:Envelope>''';
-
     var response = await post(
       Uri.parse(
           'http://XXHRMS:XXHRMS@202.125.141.170:8080/orawsv/XXHRMS/SUBMIT_EMP_LEAVES'),
@@ -1092,20 +1092,31 @@ class _LeaveRequestState extends State<LeaveRequest> {
       final outputValue = outputElement?.text;
       print(outputValue);
 
-      if (outputValue == "OK") {
+      if (outputValue == "Leave Submitted") {
+        // if (outputValue == "OK") {
+        final prefs = await SharedPreferences.getInstance();
+        final String? approvalId = prefs.getString('approvalId');
+        if(approvalId!.isNotEmpty){
+          String notificationId = DateTime.now().toString();
+
+          await sendTopicMessage(approvalId ?? "",'Leave Request','New Leave Request for approval', notificationId);
+
+          // await sendTopicMessage(approvalId ?? "",'Leave Request','New Leave Request for approval');
+        }
         submitAlertCustom();
-      //  toast("Submitted successfully!");
+        //  toast("Submitted successfully!");
       } // prints "OK"
       else {
         errorCustom("$outputValue");
-        toast("Submitted fail!");
+        //toast("Submitted fail!");
       }
     }
   }
 
   String? checkAnnualSession() {
     print("checkAnnualSession enter $annualBal $annualBal2");
-    print("checkAnnualSession session $annualSession $annualSession2"); //6 7 // 4 3
+    print(
+        "checkAnnualSession session $annualSession $annualSession2"); //6 7 // 4 3
 //here
     if (annualBal == "0") {
       print("checkAnnualSession if $annualSession");
@@ -1116,8 +1127,7 @@ class _LeaveRequestState extends State<LeaveRequest> {
       });
       print("checkAnnualSession if $annualSession");
       return annualSession;
-    }
-    else if (annualBal2 == "0") {
+    } else if (annualBal2 == "0") {
       print("checkAnnualSession else $annualSession");
 
       setState(() {
@@ -1127,10 +1137,11 @@ class _LeaveRequestState extends State<LeaveRequest> {
       print("checkAnnualSession else $annualSession");
 
       return annualSession;
-    }else {
+    } else {
       return annualSession;
     }
   }
+
   void submitAlertCustom() {
     Dialog doneDialog = Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -1143,9 +1154,8 @@ class _LeaveRequestState extends State<LeaveRequest> {
           children: <Widget>[
             Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_8XY7J1RJeZ.json")
-            ),
-
+                child: Lottie.network(
+                    "https://assets10.lottiefiles.com/packages/lf20_8XY7J1RJeZ.json")),
             Padding(padding: EdgeInsets.only(top: 5.0)),
             TextButton(
                 onPressed: () {
@@ -1155,15 +1165,15 @@ class _LeaveRequestState extends State<LeaveRequest> {
                 },
                 child: Text(
                   'Close!',
-                  style: TextStyle(color: Colors.red, fontSize: 16.0),
+                  style: TextStyle(color: Colors.green, fontSize: 16.0),
                 ))
           ],
         ),
       ),
     );
-    showDialog(
-        context: context, builder: (BuildContext context) => doneDialog);
+    showDialog(context: context, builder: (BuildContext context) => doneDialog);
   }
+
   void errorCustom(String msg) {
     Dialog errorDialog = Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -1179,17 +1189,16 @@ class _LeaveRequestState extends State<LeaveRequest> {
               width: 200,
               child: Padding(
                   padding: EdgeInsets.all(10.0),
-                  child: Lottie.network("https://assets10.lottiefiles.com/packages/lf20_O6BZqckTma.json")
-              ),
+                  child: Lottie.network(
+                      "https://assets10.lottiefiles.com/packages/lf20_O6BZqckTma.json")),
             ),
-
             Padding(padding: EdgeInsets.only(top: 5.0)),
             Text("Reason: $msg"),
             TextButton(
                 onPressed: () {
-                  //  Navigator.of(context).pop();
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => const Home()));
+                   Navigator.of(context).pop();
+                  // Navigator.pushReplacement(context,
+                  //     MaterialPageRoute(builder: (context) => const Home()));
                 },
                 child: Text(
                   'Close!',
@@ -1202,5 +1211,4 @@ class _LeaveRequestState extends State<LeaveRequest> {
     showDialog(
         context: context, builder: (BuildContext context) => errorDialog);
   }
-
 }

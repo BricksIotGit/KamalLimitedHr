@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -20,16 +19,15 @@ class EmployeeDirectory extends StatefulWidget {
 }
 
 class _EmployeeDirectoryState extends State<EmployeeDirectory> {
-  String dropdownvalueDesig = 'ALL';
-  String dropdownvalueDepart = 'ALL';
+  String dropdownvalueDesig = 'ALL DEPARTMENTS';
+  String dropdownvalueDepart = 'ALL DEPARTMENTS';
 
-  String dropDesignQuery='null';
-  String dropDeptQuery='null';
+  String dropDesignQuery = 'null';
+  String dropDeptQuery = 'null';
 
   String query = '';
   String searchQuery = 'null';
   List<Map<String, String>> results = [];
-
 
   String infoEmpId = "0000";
   String infoEmpDesignLvl = "0000";
@@ -46,123 +44,38 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
   //String password = 'xxhrms';
   String basicAuth = 'Basic ' + base64.encode(utf8.encode('xxhrms:xxhrms'));
 
-
   String? selectedDsgn;
+  String? selectedLocation;
   String? selectedDept;
+  String? selectedDeptIs = "ALL DEPARTMENTS";
 
-  onDeptChanged(String? value) {
+  // onDeptChanged(String? value) {
+  //
+  //   print("onDeptChanged value $value");
+  //   //dont change second dropdown if 1st item didnt change
+  //   if (value != selectedDsgn) selectedDept = null;
+  //   setState(() {
+  //     selectedDsgn = value;
+  //   });
+  //
+  //   dropdownvalueDepart = value!;
+  //   if (dropdownvalueDepart == "ALL DEPARTMENTS") {
+  //     dropDeptQuery='null';
+  //
+  //   } else {
+  //     dropDeptQuery="'$dropdownvalueDepart'";
+  //
+  //   }
+  //   dropDesignQuery="null";
+  //   apiSearch();
+  //
+  // }
 
-    print("onDeptChanged value $value");
-    //dont change second dropdown if 1st item didnt change
-    if (value != selectedDsgn) selectedDept = null;
-    setState(() {
-      selectedDsgn = value;
-    });
 
-    dropdownvalueDepart = value!;
-    if (dropdownvalueDepart == "ALL") {
-      dropDeptQuery='null';
 
-    } else {
-      dropDeptQuery="'$dropdownvalueDepart'";
-
-    }
-    dropDesignQuery="null";
-    apiSearch();
-
-  }
-
-  late Map<String, List<String>> dataSetAll = {
-    'ALL':itemsOfDg,
-    'GD - ADMINISTRATION': adminDsgn,
-    'GD - INTERNAL AUDIT': internalAuditDsgn,
-    'GD - COSTING': costingDsgn,
-    'GD - IMPORT &amp; EXPORT': importExportDsgn,
-    'GD - INFORMATION TECHNOLOGY': infoTechDsgn,
-    'GD - HUMAN RESOURCES': humanResourceDsgn,
-  };
-  final List<String> adminDsgn = [
-    'ALL',
-    'DRIVER',
-    'SWEEPER',
-    'OFFICE BOY',
-    'SUPERVISOR',
-    'RECEPTIONIST',
-    'SECURITY GUARD',
-    'GATE CLERK',
-    'CCTV OPERATOR',
-    'ASSISTANT MANAGER',
-    'DEPUTY MANAGER',
-    'EXCHANGE OPERATOR',
-  ];
-  final List<String> internalAuditDsgn = [
-    'ALL',
-    'OFFICER',
-    'INCHARGE',
-    'SENIOR MANAGER',
-    'EXECUTIVE.',
-    'DEPUTY MANAGER',
-  ];
-  final List<String> costingDsgn = [
-    'ALL',
-    'OFFICER',
-    'DEPUTY MANAGER',
-  ];
-
-  final List<String> importExportDsgn = [
-    'ALL',
-    'OFFICER',
-    'SENIOR MANAGER',
-    'ASSISTANT MANAGER',
-  ];
-  final List<String> infoTechDsgn = [
-    'ALL',
-
-    'ASSISTANT NETWORK ADMINISTRATOR',
-    'ASSISTANT BUSINESS ANALYST',
-    'MANAGER',
-    'OFFICER',
-    'ASSISTANT MANAGER',
-  ];
-  final List<String> humanResourceDsgn = [
-    'ALL',
-    'TIME KEEPER',
-    'OFFICER',
-    'EXECUTIVE',
-    'RECRUITMENT ASSOCIATE',
-    'EXECUTIVE.',
-    'DEPUTY MANAGER',
-    'GENERAL MANAGER',
-
-  ];
-  // print(basicAuth);
-  var itemsOfDg = [
-    'ALL',
-    'RECEPTIONIST',
-    'EXECUTIVE',
-    'DEPUTY MANAGER',
-    'MANAGER',
-    'GENERAL MANAGER',
-    'ASSISTANT MANAGER',
-    'SENIOR MANAGER',
-    'ASSISTANT BUSINESS ANALYST',
-    'OFFICER',
-    'ASSISTANT NETWORK ADMINISTRATOR',
-    'INCHARGE',
-    'RECRUITMENT ASSOCIATE',
-    'TIME KEEPER',
-    'OFFICE BOY',
-    'SUPERVISOR',
-    'GATE CLERK',
-    'CCTV OPERATOR',
-    'EXCHANGE OPERATOR',
-    'SWEEPER',
-    'DRIVER',
-    'SECURITY GUARD',
-  ];
 
   var itemsOfdept = [
-    'ALL',
+    'ALL DEPARTMENTS',
     'GD - ADMINISTRATION',
     'GD - INTERNAL AUDIT',
     'GD - COSTING',
@@ -173,19 +86,18 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
 
   void apiSearch() async {
     setState(() {
-
-     fetchOrNot = false;
+      fetchOrNot = false;
     });
     employeesDirectory.clear();
-    var concatName="";
+    var concatName = "";
 
-    if(searchQuery=='null'){
-      concatName="null";
-    }else{
-      concatName="'%$searchQuery%'";
+    if (searchQuery == 'null') {
+      concatName = "null";
+    } else {
+      concatName = "'%$searchQuery%'";
     }
 
-   // print("apiserrr $searchQuery and $concatName and $dropDeptQuery and $dropDesignQuery");
+      print("apiserrr $searchQuery and $concatName and $dropDeptQuery and $dropDesignQuery");
     var requestBody =
         '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DIRECTORY">
              <soapenv:Header/>
@@ -194,7 +106,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
              <get:P_OUTPUT-XMLTYPE-OUT/>
             <get:P_ENAME-VARCHAR2-IN>${concatName.toUpperCase()}</get:P_ENAME-VARCHAR2-IN>
              <get:P_EMP_ID-VARCHAR2-IN>null</get:P_EMP_ID-VARCHAR2-IN>
-             <get:P_EMP_DESIGNATION-VARCHAR2-IN>$dropDesignQuery</get:P_EMP_DESIGNATION-VARCHAR2-IN>
+             <get:P_EMP_DESIGNATION-VARCHAR2-IN>null</get:P_EMP_DESIGNATION-VARCHAR2-IN>
              <get:P_EMP_DEPARTMENT-VARCHAR2-IN>$dropDeptQuery</get:P_EMP_DEPARTMENT-VARCHAR2-IN>
               </get:GET_EMP_DIRECTORYInput>
             </soapenv:Body>
@@ -219,15 +131,13 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
     var xmlSP = response.body.toString();
 
     final document = xml.XmlDocument.parse(xmlSP);
-   // print("search Response document: ${document}");
+    // print("search Response document: ${document}");
     print(
         "Response document length: ${document.findAllElements('ROWSET').length}");
 
-    if(document.findAllElements('ROWSET').isEmpty){
+    if (document.findAllElements('ROWSET').isEmpty) {
       toast("No data available for this query");
-    }
-
-    else{
+    } else {
       final rowset = document.findAllElements('ROWSET').last;
 
       // print("Response employeesNode: ${rowset}");
@@ -240,6 +150,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
         final empDpt = row.findElements('EMP_DEPARTMENT').single.text;
         final empDesig = row.findElements('EMP_DESIGNATION').single.text;
         final doj = row.findElements('DOJ').single.text;
+        final ext = row.findElements('EXT_NO').single.text;
         final doc = (row.findElements('DOC').isNotEmpty)
             ? row.findElements('DOC').single.text
             : "";
@@ -251,7 +162,8 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
 
         final empShift = row.findElements('EMP_SHIFT').single.text;
         final empDvName = row.findElements('DIV_NAME').single.text;
-        final empDesignLvl = row.findElements('EMP_DESIGNATION_LVL').single.text;
+        final empDesignLvl =
+            row.findElements('EMP_DESIGNATION_LVL').single.text;
 
         employeesDirectoryAPISearch.add({
           'empId': empId,
@@ -262,6 +174,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
           'empDesig': empDesig,
           'doj': doj,
           'doc': doc,
+          'ext': ext,
           'empType': empType,
           'empEmail': empEmail,
           'empShift': empShift,
@@ -272,10 +185,9 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
         employeesDirectoryBackup = employeesDirectoryAPISearch;
       }
       setState(() {
-
         employeesDirectory = employeesDirectoryAPISearch;
-      //  print("lissssst $employeesDirectory");
-      //  print("lissssst $employeesDirectory");
+        //  print("lissssst $employeesDirectory");
+        //  print("lissssst $employeesDirectory");
       });
     }
   }
@@ -288,8 +200,58 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
 
   @override
   void initState() {
-    hitApi();
+
+    getAllDept().then((value) {
+      hitApi();
+    });
     super.initState();
+  }
+  Future<void> getAllDept() async {
+
+    // http://202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_DEPT
+    var requestBody = '''<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:get="http://xmlns.oracle.com/orawsv/XXHRMS/GET_EMP_DEPT">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <get:GET_EMP_DEPTInput>
+         <get:P_OUTPUT-XMLTYPE-OUT/>
+      </get:GET_EMP_DEPTInput>
+   </soapenv:Body>
+</soapenv:Envelope>''';
+
+    var response = await post(
+      Uri.parse('http://202.125.141.170:8080/orawsv/XXHRMS/GET_EMP_DEPT'),
+      headers: {
+        'content-type': 'text/xml; charset=utf-8',
+        'authorization': basicAuth
+      },
+      body: utf8.encode(requestBody),
+    );
+
+    print("Response status: ${response.statusCode}");
+
+    if(response.statusCode==200){
+      final document =  xml.XmlDocument.parse(response.body.toString());
+      final rowsetElement = document.findAllElements('ROWSET').single;
+      List< xml.XmlElement> rowElements = rowsetElement.findAllElements('ROW').toList();
+
+      itemsOfdept.clear();
+      itemsOfdept.add("ALL DEPARTMENTS");
+      for (final rowElement in rowElements) {
+        String? deptId = rowElement.getElement('DEPT_ID')?.text;
+        String? empDepartment = rowElement.getElement('EMP_DEPARTMENT')?.text;
+
+        print('DEPT_ID: $deptId');
+        print('EMP_DEPARTMENT: $empDepartment');
+        print('----------------------------------');
+        itemsOfdept.add('$empDepartment');
+      }
+      setState(() {
+
+      });
+      print("itemsOfdept complete: $itemsOfdept");
+
+    }
+
   }
 
   hitApi() async {
@@ -345,15 +307,14 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
       final empDpt = row.findElements('EMP_DEPARTMENT').single.text;
       final empDesig = row.findElements('EMP_DESIGNATION').single.text;
       final doj = row.findElements('DOJ').single.text;
+      final ext = row.findElements('EXT_NO').single.text;
       final doc = (row.findElements('DOC').isNotEmpty)
           ? row.findElements('DOC').single.text
           : "";
       final empEmail = (row.findElements('EMAIL').isNotEmpty)
           ? row.findElements('EMAIL').single.text
           : "";
-
       final empType = row.findElements('EMP_TYPE').single.text;
-
       final empShift = row.findElements('EMP_SHIFT').single.text;
       final empDvName = row.findElements('DIV_NAME').single.text;
       final empDesignLvl = row.findElements('EMP_DESIGNATION_LVL').single.text;
@@ -367,6 +328,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
         'empDesig': empDesig,
         'doj': doj,
         'doc': doc,
+        'ext': ext,
         'empType': empType,
         'empEmail': empEmail,
         'empShift': empShift,
@@ -380,16 +342,29 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
     print("Response employees length: ${employeesDirectory.length}");
   }
 
-  void infoAlertCustom() {
+  void infoAlertCustom(int index) {
     Dialog errorDialog = Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-
       child: Container(
         height: 300.0,
         width: 300.0,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Division Name: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    TextSpan(text: ' $infoEmpDvName'),
+                  ],
+                ),
+              ),
+            ),
             Padding(
               padding: EdgeInsets.all(10.0),
               child: Text.rich(
@@ -410,10 +385,10 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: 'Division Name: ',
+                      text: 'Ext No:',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    TextSpan(text: ' $infoEmpDvName'),
+                    TextSpan(text: ' ${employeesDirectory[index]['ext']}'),
                   ],
                 ),
               ),
@@ -521,41 +496,38 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                     child: CupertinoSearchTextField(
                                       controller: textController,
                                       autocorrect: true,
-                                      onChanged: (v) {
-
-                                      },
-                                      onSubmitted: (v){
+                                      onChanged: (v) {},
+                                      onSubmitted: (v) {
                                         setState(() {
                                           query = v;
                                           if (query.isEmpty) {
-                                            searchQuery='null';
+                                            searchQuery = 'null';
                                             reasign();
-                                          }else{
-                                            searchQuery=v;
-
+                                          } else {
+                                            searchQuery = v;
                                           }
 
-                                                  apiSearch();
-
-
+                                          apiSearch();
                                         });
                                       },
                                     ),
                                   ),
                                 ),
-                                Image(
-                                  //   height:50* SizeConfig.heightMultiplier,
-                                  width: 10 * SizeConfig.widthMultiplier,
-                                  image: AssetImage(Images.notification_ic),
-                                ),
+                                // Image(
+                                //   //   height:50* SizeConfig.heightMultiplier,
+                                //   width: 10 * SizeConfig.widthMultiplier,
+                                //   image: AssetImage(Images.notification_ic),
+                                // ),
+                                SizedBox(width: 10 * SizeConfig.widthMultiplier,),
+
                               ],
                             ),
                           ),
                         ),
                       ),
                       Positioned(
-                        top: 14.8 *SizeConfig.heightMultiplier,
-                       left:57* SizeConfig.widthMultiplier,
+                        top: 14.8 * SizeConfig.heightMultiplier,
+                        left: 57 * SizeConfig.widthMultiplier,
                         child: OutlinedButton(
                           child: Text(
                             "Clear filters",
@@ -564,17 +536,18 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                             ),
                           ),
                           onPressed: () {
-                            selectedDsgn=null;
-                             selectedDept=null;
-                            textController.text="";
-                            searchQuery="null";
-                            dropDeptQuery="null";
-                            dropDesignQuery="null";
-                            dropdownvalueDesig = 'ALL';
-                              dropdownvalueDepart = 'ALL';
+                            //here
+                          selectedDeptIs="ALL DEPARTMENTS";
+                            selectedDsgn = null;
+                            selectedDept = null;
+                            textController.text = "";
+                            searchQuery = "null";
+                            dropDeptQuery = "null";
+                            dropDesignQuery = "null";
+                            dropdownvalueDesig = 'ALL DEPARTMENTS';
+                            dropdownvalueDepart = 'ALL DEPARTMENTS';
                             setState(() {
-                             apiSearch();
-
+                              apiSearch();
                             });
                           },
                         ),
@@ -583,59 +556,127 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                   ),
                   Column(
                     children: [
+                      // Padding(
+                      //   padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
+                      //   child: SizedBox(
+                      //     width: 85 * SizeConfig.widthMultiplier,
+                      //     child: SizedBox(
+                      //       width: 30 * SizeConfig.widthMultiplier,
+                      //       child: DropdownButtonFormField(
+                      //
+                      //           isExpanded: true,
+                      //           decoration: InputDecoration(
+                      //             contentPadding: const EdgeInsets.only(
+                      //                 top: 5, bottom: 5, left: 10, right: 5),
+                      //             //this one
+                      //             focusedBorder: OutlineInputBorder(
+                      //               borderSide: BorderSide(
+                      //                   color: Clrs.light_Grey, width: 1),
+                      //               borderRadius: BorderRadius.circular(10),
+                      //             ),
+                      //             enabledBorder: OutlineInputBorder(
+                      //               borderSide: BorderSide(
+                      //                   color: Clrs.light_Grey, width: 1),
+                      //               borderRadius: BorderRadius.circular(10),
+                      //             ),
+                      //             border: OutlineInputBorder(
+                      //               borderSide: BorderSide(
+                      //                   color: Clrs.light_Grey, width: 1),
+                      //               borderRadius: BorderRadius.circular(10),
+                      //             ),
+                      //             filled: true,
+                      //             fillColor: Clrs.medium_Grey,
+                      //           ),
+                      //           dropdownColor: Clrs.light_Grey,
+                      //           // Initial Value
+                      //           value: selectedDsgn,
+                      //           // Down Arrow Ico
+                      //           icon: const Icon(Icons.keyboard_arrow_down),
+                      //           // Array list of items
+                      //           items: dataSetAll.keys.map((String items) {
+                      //             return DropdownMenuItem(
+                      //               value: items,
+                      //               child: Text(items),
+                      //             );
+                      //           }).toList(),
+                      //           onTap: () {},
+                      //           onChanged: onDeptChanged
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+
+                      // Padding(
+                      //   padding: const EdgeInsets.fromLTRB(30, 5, 30, 15),
+                      //   child: Container(
+                      //     width: 85 * SizeConfig.widthMultiplier,
+                      //     child: SizedBox(
+                      //       width: 30 * SizeConfig.widthMultiplier,
+                      //       child: DropdownButtonFormField(
+                      //         isExpanded: true,
+                      //         decoration: InputDecoration(
+                      //           contentPadding: const EdgeInsets.only(
+                      //               top: 5, bottom: 5, left: 10, right: 5),
+                      //           //this one
+                      //           focusedBorder: OutlineInputBorder(
+                      //             borderSide: BorderSide(
+                      //                 color: Clrs.light_Grey, width: 1),
+                      //             borderRadius: BorderRadius.circular(10),
+                      //           ),
+                      //           enabledBorder: OutlineInputBorder(
+                      //             borderSide: BorderSide(
+                      //                 color: Clrs.light_Grey, width: 1),
+                      //             borderRadius: BorderRadius.circular(10),
+                      //           ),
+                      //           border: OutlineInputBorder(
+                      //             borderSide: BorderSide(
+                      //                 color: Clrs.light_Grey, width: 1),
+                      //             borderRadius: BorderRadius.circular(10),
+                      //           ),
+                      //           filled: true,
+                      //           fillColor: Clrs.medium_Grey,
+                      //         ),
+                      //         dropdownColor: Clrs.light_Grey,
+                      //         // Initial Value
+                      //         value: selectedDept,
+                      //         // Down Arrow Ico
+                      //         icon: const Icon(Icons.keyboard_arrow_down),
+                      //         // Array list of items
+                      //         items: (dataSetAll[selectedDsgn] ?? []).map((String items) {
+                      //           print("TEST list $items");
+                      //           return DropdownMenuItem(
+                      //             value: items,
+                      //             child: Text(items),
+                      //           );
+                      //         }).toList(),
+                      //         onTap: () {},
+                      //         onChanged: (String? newValue) {
+                      //           try{
+                      //             setState(() {
+                      //               selectedDept=newValue;
+                      //               dropdownvalueDesig = newValue!;
+                      //               print(
+                      //                   "value Drup $dropdownvalueDesig and $newValue");
+                      //               if (dropdownvalueDesig == "ALL DEPARTMENTS") {
+                      //                 dropDesignQuery='null';
+                      //               } else {
+                      //                 dropDesignQuery="'$dropdownvalueDesig'";
+                      //               }
+                      //               apiSearch();
+                      //             });
+                      //           }
+                      //           catch (e){
+                      //             print("$e");
+                      //           }
+                      //         },
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+
                       Padding(
                         padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
                         child: SizedBox(
-                          width: 85 * SizeConfig.widthMultiplier,
-                          child: SizedBox(
-                            width: 30 * SizeConfig.widthMultiplier,
-                            child: DropdownButtonFormField(
-
-                                isExpanded: true,
-                                decoration: InputDecoration(
-                                  contentPadding: const EdgeInsets.only(
-                                      top: 5, bottom: 5, left: 10, right: 5),
-                                  //this one
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Clrs.light_Grey, width: 1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Clrs.light_Grey, width: 1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                        color: Clrs.light_Grey, width: 1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  filled: true,
-                                  fillColor: Clrs.medium_Grey,
-                                ),
-                                dropdownColor: Clrs.light_Grey,
-                                // Initial Value
-                                value: selectedDsgn,
-                                // Down Arrow Ico
-                                icon: const Icon(Icons.keyboard_arrow_down),
-                                // Array list of items
-                                items: dataSetAll.keys.map((String items) {
-                                  return DropdownMenuItem(
-                                    value: items,
-                                    child: Text(items),
-                                  );
-                                }).toList(),
-                                onTap: () {},
-                                onChanged: onDeptChanged
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(30, 5, 30, 15),
-                        child: Container(
                           width: 85 * SizeConfig.widthMultiplier,
                           child: SizedBox(
                             width: 30 * SizeConfig.widthMultiplier,
@@ -665,36 +706,80 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                               ),
                               dropdownColor: Clrs.light_Grey,
                               // Initial Value
-                              value: selectedDept,
+                              value: "Garments Division",
                               // Down Arrow Ico
                               icon: const Icon(Icons.keyboard_arrow_down),
                               // Array list of items
-                              items: (dataSetAll[selectedDsgn] ?? []).map((String items) {
-                                print("TEST list $items");
+                              items: <String>['Garments Division']
+                                  .map((String items) {
                                 return DropdownMenuItem(
                                   value: items,
                                   child: Text(items),
                                 );
                               }).toList(),
                               onTap: () {},
-                              onChanged: (String? newValue) {
-                                try{
-                                  setState(() {
-                                    selectedDept=newValue;
-                                    dropdownvalueDesig = newValue!;
-                                    print(
-                                        "value Drup $dropdownvalueDesig and $newValue");
-                                    if (dropdownvalueDesig == "ALL") {
-                                      dropDesignQuery='null';
-                                    } else {
-                                      dropDesignQuery="'$dropdownvalueDesig'";
-                                    }
-                                    apiSearch();
-                                  });
-                                }
-                              catch (e){
-                                  print("$e");
-                              }
+                              onChanged: (String? value) {},
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
+                        child: SizedBox(
+                          width: 85 * SizeConfig.widthMultiplier,
+                          child: SizedBox(
+                            width: 30 * SizeConfig.widthMultiplier,
+                            child: DropdownButtonFormField(
+                              isExpanded: true,
+                              decoration: InputDecoration(
+                                contentPadding: const EdgeInsets.only(
+                                    top: 5, bottom: 5, left: 10, right: 5),
+                                //this one
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Clrs.light_Grey, width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Clrs.light_Grey, width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                      color: Clrs.light_Grey, width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                filled: true,
+                                fillColor: Clrs.medium_Grey,
+                              ),
+                              dropdownColor: Clrs.light_Grey,
+                              // Initial Value
+                              value: selectedDeptIs,
+                              // Down Arrow Ico
+                              icon: const Icon(Icons.keyboard_arrow_down),
+                              // Array list of items
+
+                              items: itemsOfdept.map((String items) {
+                                return DropdownMenuItem(
+                                  value: items,
+                                  child: Text(items),
+                                );
+                              }).toList(),
+                              onTap: () {},
+                              onChanged: (String? value) {
+                                setState(() {
+                                  print("object is $value");
+                                  if(value=="ALL DEPARTMENTS"){
+                                    selectedDeptIs = value!;
+                                    dropDeptQuery="null";
+                                  }
+                                  else{
+                                    selectedDeptIs = value!;
+                                    dropDeptQuery="'$value'";
+                                  }
+                                });
+                                apiSearch();
                               },
                             ),
                           ),
@@ -702,139 +787,6 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                       ),
                     ],
                   ),
-
-                  // abouve new
-                  // Column(
-                  //   children: [
-                  //     Padding(
-                  //       padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
-                  //       child: Container(
-                  //         width: 85 * SizeConfig.widthMultiplier,
-                  //         child: SizedBox(
-                  //           width: 30 * SizeConfig.widthMultiplier,
-                  //           child: DropdownButtonFormField(
-                  //             isExpanded: true,
-                  //             decoration: InputDecoration(
-                  //               contentPadding: const EdgeInsets.only(
-                  //                   top: 5, bottom: 5, left: 10, right: 5),
-                  //               //this one
-                  //               focusedBorder: OutlineInputBorder(
-                  //                 borderSide: BorderSide(
-                  //                     color: Clrs.light_Grey, width: 1),
-                  //                 borderRadius: BorderRadius.circular(10),
-                  //               ),
-                  //               enabledBorder: OutlineInputBorder(
-                  //                 borderSide: BorderSide(
-                  //                     color: Clrs.light_Grey, width: 1),
-                  //                 borderRadius: BorderRadius.circular(10),
-                  //               ),
-                  //               border: OutlineInputBorder(
-                  //                 borderSide: BorderSide(
-                  //                     color: Clrs.light_Grey, width: 1),
-                  //                 borderRadius: BorderRadius.circular(10),
-                  //               ),
-                  //               filled: true,
-                  //               fillColor: Clrs.medium_Grey,
-                  //             ),
-                  //             dropdownColor: Clrs.light_Grey,
-                  //             // Initial Value
-                  //             value: dropdownvalueDepart,
-                  //             // Down Arrow Ico
-                  //             icon: const Icon(Icons.keyboard_arrow_down),
-                  //             // Array list of items
-                  //             items: itemsOfdept.map((String items) {
-                  //               return DropdownMenuItem(
-                  //                 value: items,
-                  //                 child: Text(items),
-                  //               );
-                  //             }).toList(),
-                  //             onTap: () {},
-                  //             onChanged: (String? newValue) {
-                  //               setState(() {
-                  //                 dropdownvalueDepart = newValue!;
-                  //                 if (dropdownvalueDepart == "ALL") {
-                  //                   dropDeptQuery='null';
-                  //                   //reasign();
-                  //                 } else {
-                  //                   dropDeptQuery="'$dropdownvalueDepart'";
-                  //                   //setResultsDropDept(dropdownvalueDepart);
-                  //                 }
-                  //                 apiSearch();
-                  //
-                  //               });
-                  //             },
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //     Padding(
-                  //       padding: const EdgeInsets.fromLTRB(30, 5, 30, 15),
-                  //       child: Container(
-                  //         width: 85 * SizeConfig.widthMultiplier,
-                  //         child: SizedBox(
-                  //           width: 30 * SizeConfig.widthMultiplier,
-                  //           child: DropdownButtonFormField(
-                  //             isExpanded: true,
-                  //             decoration: InputDecoration(
-                  //               contentPadding: const EdgeInsets.only(
-                  //                   top: 5, bottom: 5, left: 10, right: 5),
-                  //               //this one
-                  //               focusedBorder: OutlineInputBorder(
-                  //                 borderSide: BorderSide(
-                  //                     color: Clrs.light_Grey, width: 1),
-                  //                 borderRadius: BorderRadius.circular(10),
-                  //               ),
-                  //               enabledBorder: OutlineInputBorder(
-                  //                 borderSide: BorderSide(
-                  //                     color: Clrs.light_Grey, width: 1),
-                  //                 borderRadius: BorderRadius.circular(10),
-                  //               ),
-                  //               border: OutlineInputBorder(
-                  //                 borderSide: BorderSide(
-                  //                     color: Clrs.light_Grey, width: 1),
-                  //                 borderRadius: BorderRadius.circular(10),
-                  //               ),
-                  //               filled: true,
-                  //               fillColor: Clrs.medium_Grey,
-                  //             ),
-                  //             dropdownColor: Clrs.light_Grey,
-                  //             // Initial Value
-                  //             value: dropdownvalueDesig,
-                  //             // Down Arrow Ico
-                  //             icon: const Icon(Icons.keyboard_arrow_down),
-                  //             // Array list of items
-                  //             items: itemsOfDg.map((String items) {
-                  //               return DropdownMenuItem(
-                  //                 value: items,
-                  //                 child: Text(items),
-                  //               );
-                  //             }).toList(),
-                  //             onTap: () {},
-                  //             onChanged: (String? newValue) {
-                  //               setState(() {
-                  //                 dropdownvalueDesig = newValue!;
-                  //                 print(
-                  //                     "value Drup $dropdownvalueDesig and $newValue");
-                  //
-                  //                 // print(
-                  //                 //     "value Drup $dropdownvalueDesig and $newValue");
-                  //                 if (dropdownvalueDesig == "ALL") {
-                  //                   dropDesignQuery='null';
-                  //                   // reasign();
-                  //                 } else {
-                  //                   dropDesignQuery="'$dropdownvalueDesig'";
-                  //                   // setResultsDropDown(dropdownvalueDesig);
-                  //                 }
-                  //
-                  //                 apiSearch();
-                  //               });
-                  //             },
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                   Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Container(
@@ -854,7 +806,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                   "Sr.",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: 13,
                                       color: Clrs.dark_Grey),
                                 ),
                                 flex: 0),
@@ -865,27 +817,35 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                     "Name",
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                        fontSize: 13,
                                         color: Clrs.dark_Grey),
                                   ),
                                 ),
                                 flex: 1),
                             Flexible(
-                                child: Text(
-                                  "Dept.",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Clrs.dark_Grey),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+
+                                  child: Text(
+                                    "Dept.",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        color: Clrs.dark_Grey),
+                                  ),
                                 ),
                                 flex: 1),
                             Flexible(
-                                child: Text(
-                                  "Designation",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Clrs.dark_Grey),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+
+                                  child: Text(
+                                    "Designation",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        color: Clrs.dark_Grey),
+                                  ),
                                 ),
                                 flex: 1),
                             Flexible(
@@ -893,7 +853,7 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                   "Status",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                      fontSize: 13,
                                       color: Clrs.dark_Grey),
                                 ),
                                 flex: 1)
@@ -903,10 +863,8 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                     ),
                   ),
                   SizedBox(
-
-                    height: 50*SizeConfig.heightMultiplier,
+                    height: 50 * SizeConfig.heightMultiplier,
                     child: Padding(
-
                       padding: const EdgeInsets.all(10.0),
                       child: ListView.builder(
                         itemCount: employeesDirectory.length,
@@ -967,8 +925,8 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                     Flexible(
                                       child: GestureDetector(
                                         onTap: () {
-                                          infoEmpId =
-                                              employeesDirectory[index]['empId']!;
+                                          infoEmpId = employeesDirectory[index]
+                                              ['empId']!;
                                           infoEmpDvName =
                                               employeesDirectory[index]
                                                   ['empDvName']!;
@@ -979,14 +937,14 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                               employeesDirectory[index]
                                                   ['empEmail']!;
 
-                                          infoAlertCustom();
+                                          infoAlertCustom(index);
                                         },
                                         child: Text(
                                           "Info.",
                                           style: TextStyle(
-                                              //fontWeight: FontWeight.bold,
+                                              decoration: TextDecoration.underline,
                                               fontSize: 12,
-                                              color: Clrs.dark_Grey),
+                                              color: Clrs.blue),
                                         ),
                                       ),
                                     )
@@ -999,7 +957,6 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                       ),
                     ),
                   )
-
                 ],
               ),
             ),
@@ -1079,11 +1036,12 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                                 ),
                               ),
                             ),
-                            Image(
-                              //   height:50* SizeConfig.heightMultiplier,
-                              width: 10 * SizeConfig.widthMultiplier,
-                              image: AssetImage(Images.notification_ic),
-                            ),
+                            // Image(
+                            //   //   height:50* SizeConfig.heightMultiplier,
+                            //   width: 10 * SizeConfig.widthMultiplier,
+                            //   image: AssetImage(Images.notification_ic),
+                            // ),
+                            SizedBox(width: 10 * SizeConfig.widthMultiplier,),
                           ],
                         ),
                       ),
@@ -1095,29 +1053,29 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
-                    child: Container(
+                    child: SizedBox(
                       width: 85 * SizeConfig.widthMultiplier,
                       child: SizedBox(
                         width: 30 * SizeConfig.widthMultiplier,
                         child: DropdownButtonFormField(
                           isExpanded: true,
                           decoration: InputDecoration(
-                            contentPadding: EdgeInsets.only(
+                            contentPadding: const EdgeInsets.only(
                                 top: 5, bottom: 5, left: 10, right: 5),
                             //this one
                             focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderSide: BorderSide(
+                                  color: Clrs.light_Grey, width: 1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderSide: BorderSide(
+                                  color: Clrs.light_Grey, width: 1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Clrs.light_Grey, width: 1),
+                              borderSide: BorderSide(
+                                  color: Clrs.light_Grey, width: 1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             filled: true,
@@ -1125,10 +1083,60 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                           ),
                           dropdownColor: Clrs.light_Grey,
                           // Initial Value
-                          value: dropdownvalueDepart,
+                          value: "Garments Division",
                           // Down Arrow Ico
                           icon: const Icon(Icons.keyboard_arrow_down),
                           // Array list of items
+                          items: <String>['Garments Division']
+                              .map((String items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Text(items),
+                            );
+                          }).toList(),
+                          onTap: () {},
+                          onChanged: (String? value) {},
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(30, 15, 30, 5),
+                    child: SizedBox(
+                      width: 85 * SizeConfig.widthMultiplier,
+                      child: SizedBox(
+                        width: 30 * SizeConfig.widthMultiplier,
+                        child: DropdownButtonFormField(
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.only(
+                                top: 5, bottom: 5, left: 10, right: 5),
+                            //this one
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Clrs.light_Grey, width: 1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: Clrs.medium_Grey,
+                          ),
+                          dropdownColor: Clrs.light_Grey,
+                          // Initial Value
+                          value: selectedDeptIs,
+                          // Down Arrow Ico
+                          icon: const Icon(Icons.keyboard_arrow_down),
+                          // Array list of items
+
                           items: itemsOfdept.map((String items) {
                             return DropdownMenuItem(
                               value: items,
@@ -1136,79 +1144,19 @@ class _EmployeeDirectoryState extends State<EmployeeDirectory> {
                             );
                           }).toList(),
                           onTap: () {},
-                          onChanged: (String? newValue) {
+                          onChanged: (String? value) {
                             setState(() {
-                              dropdownvalueDepart = newValue!;
-                              // if (dropdownvalueDepart == "ALL") {
-                              //   reasign();
-                              // } else {
-                              //   setResultsDropDept(dropdownvalueDepart);
-                              // }
+                              print("object is $value");
+                              if(value=="ALL DEPARTMENTS"){
+                                selectedDeptIs = value!;
+                                dropDeptQuery="null";
+                              }
+                              else{
+                                selectedDeptIs = value!;
+                                dropDeptQuery="'$value'";
+                              }
                             });
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(30, 5, 30, 15),
-                    child: Container(
-                      width: 85 * SizeConfig.widthMultiplier,
-                      child: SizedBox(
-                        width: 30 * SizeConfig.widthMultiplier,
-                        child: DropdownButtonFormField(
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.only(
-                                top: 5, bottom: 5, left: 10, right: 5),
-                            //this one
-                            focusedBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Clrs.light_Grey, width: 1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Clrs.light_Grey, width: 1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Clrs.light_Grey, width: 1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            filled: true,
-                            fillColor: Clrs.medium_Grey,
-                          ),
-                          dropdownColor: Clrs.light_Grey,
-                          // Initial Value
-                          value: dropdownvalueDesig,
-                          // Down Arrow Ico
-                          icon: const Icon(Icons.keyboard_arrow_down),
-                          // Array list of items
-                          items: itemsOfDg.map((String items) {
-                            return DropdownMenuItem(
-                              value: items,
-                              child: Text(items),
-                            );
-                          }).toList(),
-                          onTap: () {},
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              dropdownvalueDesig = newValue!;
-
-
-                              // // print(
-                              // //     "value Drup $dropdownvalueDesig and $newValue");
-                              // if (dropdownvalueDesig == "ALL") {
-                              //   dropDesignQuery='null';
-                              //  // reasign();
-                              // } else {
-                              //   dropDesignQuery=dropdownvalueDesig;
-                              //  // setResultsDropDown(dropdownvalueDesig);
-                              // }
-                              // apiSearch();
-                            });
+                            //apiSearch();
                           },
                         ),
                       ),

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../styling/images.dart';
+import '../../styling/size_config.dart';
+import 'Home.dart';
+
 class DateDifference extends StatefulWidget {
   @override
   _DateDifferenceState createState() => _DateDifferenceState();
@@ -61,6 +65,20 @@ class _DateDifferenceState extends State<DateDifference> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: GestureDetector(
+                onTap: () {
+                  // Navigator.pop(context);
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => Home()));
+                },
+                child: Image(
+                  width: 10 * SizeConfig.widthMultiplier,
+                  image: AssetImage(Images.back_arrow_ic),
+                ),
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [

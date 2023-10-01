@@ -16,9 +16,8 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  final controller= Get.put(SignUpController());
-  final _formKey= GlobalKey<FormState>();
-
+  final controller = Get.put(SignUpController());
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -68,17 +67,17 @@ class _SignupState extends State<Signup> {
                     decoration: const InputDecoration(
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         labelText: 'Username',
@@ -94,17 +93,17 @@ class _SignupState extends State<Signup> {
                     decoration: const InputDecoration(
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         labelText: 'Email',
@@ -114,23 +113,23 @@ class _SignupState extends State<Signup> {
                 Padding(
                   padding: const EdgeInsets.only(top: 30, left: 30, right: 30),
                   child: TextFormField(
-                  controller: controller.password,
+                    controller: controller.password,
                     cursorColor: Clrs.white,
                     style: const TextStyle(color: Colors.white54),
                     decoration: const InputDecoration(
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         labelText: 'Password',
@@ -145,17 +144,17 @@ class _SignupState extends State<Signup> {
                     decoration: const InputDecoration(
                         focusedBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         errorBorder: OutlineInputBorder(
                           borderSide:
-                          BorderSide(color: Colors.white54, width: 1.0),
+                              BorderSide(color: Colors.white54, width: 1.0),
                           borderRadius: BorderRadius.all(Radius.circular(5.0)),
                         ),
                         labelText: 'Confirm Password',
@@ -166,14 +165,16 @@ class _SignupState extends State<Signup> {
                   padding: const EdgeInsets.fromLTRB(0, 70, 0, 10),
                   child: ElevatedButton(
                     onPressed: () {
-                      if(_formKey.currentState!.validate()){
-                        SignUpController.instance.registerUser(controller.email.text.trim(), controller.password.text.trim());
+                      if (_formKey.currentState!.validate()) {
+                        SignUpController.instance.registerUser(
+                            controller.email.text.trim(),
+                            controller.password.text.trim());
                       }
 
                       // Navigator.pushReplacement(
                       //     context, MaterialPageRoute(builder: (context) => Home()));
                     },
-                    child: Text('Signup',
+                    child: const Text('Signup',
                         style: TextStyle(
                           color: Colors.black,
                         )),
@@ -184,11 +185,11 @@ class _SignupState extends State<Signup> {
                     ),
                   ),
                 ),
-
                 Padding(
                   padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center, //Center Row contents horizontally,
+                    mainAxisAlignment: MainAxisAlignment
+                        .center, //Center Row contents horizontally,
                     children: [
                       Text("Already have an account?",
                           style: TextStyle(
@@ -197,7 +198,9 @@ class _SignupState extends State<Signup> {
                       TextButton(
                           onPressed: () {
                             Navigator.pushReplacement(
-                                context, MaterialPageRoute(builder: (context) => Login()));
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Login()));
                           },
                           child: Text(
                             "Login",
