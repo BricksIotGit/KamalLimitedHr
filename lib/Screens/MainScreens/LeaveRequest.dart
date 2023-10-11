@@ -581,7 +581,8 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                 valueCasualCheck = false;
                                 difference = _calculateDifference()!;
                                 setState(() {});
-                              } else if (index == 1) {
+                              }
+                              else if (index == 1) {
                                 valueAnnualCheck = value;
 
                                 valueHalfSickCheck = false;
@@ -592,7 +593,8 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                 valueCasualCheck = false;
                                 difference = _calculateDifference()!;
                                 setState(() {});
-                              } else if (index == 2) {
+                              }
+                              else if (index == 2) {
                                 valueHalfSickCheck = value;
 
                                 valueSickCheck = false;
@@ -603,7 +605,8 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                 valueCasualCheck = false;
                                 difference = _calculateDifference()!;
                                 setState(() {});
-                              } else if (index == 3) {
+                              }
+                              else if (index == 3) {
                                 valueCasualCheck = value;
                                 valueHalfSickCheck = false;
                                 valueHalfCasualCheck = false;
@@ -614,18 +617,20 @@ class _LeaveRequestState extends State<LeaveRequest> {
                                 difference = _calculateDifference()!;
 
                                 setState(() {});
-                              } else if (index == 4) {
-                                valueCPLCheck = value;
-                                valueHalfSickCheck = false;
-                                valueHalfCasualCheck = false;
-                                valueSickCheck = false;
-                                valueAnnualCheck = false;
-                                // valueAnnualCheck2 = false;
-                                valueCasualCheck = false;
-                                difference = _calculateDifference()!;
-
-                                setState(() {});
-                              } else if (index == 5) {
+                              }
+                              // else if (index == 4) {
+                              //   valueCPLCheck = value;
+                              //   valueHalfSickCheck = false;
+                              //   valueHalfCasualCheck = false;
+                              //   valueSickCheck = false;
+                              //   valueAnnualCheck = false;
+                              //   // valueAnnualCheck2 = false;
+                              //   valueCasualCheck = false;
+                              //   difference = _calculateDifference()!;
+                              //
+                              //   setState(() {});
+                              // }
+                              else if (index == 4) {
                                 valueHalfCasualCheck = value;
                                 valueHalfSickCheck = false;
                                 valueCasualCheck = false;
@@ -908,7 +913,8 @@ class _LeaveRequestState extends State<LeaveRequest> {
 
                               print("sick leave can't post");
                             }
-                          } else if (postLeaveID == '13') {
+                          }
+                          else if (postLeaveID == '13') {
                             //anual
 
                             var parseBln = double.parse(annualBal!);
@@ -924,13 +930,12 @@ class _LeaveRequestState extends State<LeaveRequest> {
 
                               print("anual leave can't post");
                             }
-                          } else if (postLeaveID == '11' ||
-                              postLeaveID == '17') {
+                          }
+                          else if (postLeaveID == '11' || postLeaveID == '17') {
                             //casual
 
                             var parseBln = double.parse(casualBal!);
-                            print(
-                                "casual postLeaveID bal: $parseBln and $difference");
+                            print("casual postLeaveID bal: $parseBln and $difference");
 
                             if (parseBln >= difference) {
                               print("casual leave can post");
